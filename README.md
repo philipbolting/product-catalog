@@ -14,13 +14,11 @@ Prerequisites:
 - Maven
 - Docker
 
-Set required environment variables:
-
-Create an .env file based on the .env.example file:
+Create a .env file based on .env.example:
 ```
 product-catalog$ cp .env.example .env
 ```
-Set a random string as POSTGRES_PASSWORD in the .env file. This password is used by docker compose to configure the PostgreSQL-container.
+Set a random string as POSTGRES_PASSWORD in the .env file. Docker sets the superuser password for PostgreSQL to the value of this environment variable.
 
 Spring Boot automatically derives the database connection details from the docker compose file. No datasource configuration in application.properties necessary.
 
