@@ -10,19 +10,14 @@ Prerequisites:
 - Docker
 
 Set required environment variables:
-```
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
-export POSTGRES_DB=product_catalog
-export POSTGRES_USER=product_catalog_admin
-export POSTGRES_PASSWORD=$(pwgen -s 20 1)
-export POSTGRES_JDBC_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-```
 
-Start the PostgreSQL database Docker container:
+Create an .env file based on the .env.example file:
 ```
-product-catalog$ docker compose up --detach
+product-catalog$ cp .env.example .env
 ```
+Set a random string as POSTGRES_PASSWORD in the .env file. This password is used by docker compose to configure the PostgreSQL-container.
+
+Spring Boot automatically derives the database connection details from the docker compose file. No datasource configuration in application.properties necessary.
 
 Start the application:
 ```
