@@ -10,12 +10,6 @@ updates:
     schedule:
       interval: "daily"
 
-  # Enable version updates for Docker
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     # Dependabot will search the /.github/workflows directory, as well as the action.yml/action.yaml file from the root directory.
