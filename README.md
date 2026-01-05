@@ -2,6 +2,11 @@
 
 Microservice to manage and distribute product master data.
 
+## CI Status
+
+[![Java CI with Maven](https://github.com/philipbolting/product-catalog/actions/workflows/maven.yml/badge.svg)](https://github.com/philipbolting/product-catalog/actions/workflows/maven.yml)
+[![Dependabot Updates](https://github.com/philipbolting/product-catalog/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/philipbolting/product-catalog/actions/workflows/dependabot/dependabot-updates)
+
 ## Setup Instructions (development)
 
 Prerequisites:
