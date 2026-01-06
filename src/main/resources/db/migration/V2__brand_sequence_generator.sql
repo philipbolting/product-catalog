@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS brand;
+
+CREATE SEQUENCE seq_brand START 1 INCREMENT 1;
+
+CREATE TABLE brand (
+    id BIGINT NOT NULL,
+    slug VARCHAR(50) UNIQUE,
+    name VARCHAR(50) UNIQUE,
+    description TEXT,
+    created TIMESTAMP WITH TIME ZONE,
+    last_modified TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (id)
+);
