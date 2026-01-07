@@ -1,5 +1,6 @@
 package de.philipbolting.product_catalog.brand;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ class BrandController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createBrand(@RequestBody final BrandDTO request) {
+    public ResponseEntity<?> createBrand(@Valid @RequestBody final BrandDTO request) {
         final var brand = brandService.createBrand(request);
         final var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
