@@ -64,14 +64,27 @@ class BrandControllerTest {
 
     static Stream<Arguments> invalidBrandDTOs() {
         return Stream.of(
+                // invalid slug
                 Arguments.of(new BrandDTO(null, "Some Name" , "Some Description")),
                 Arguments.of(new BrandDTO("", "Some Name" , "Some Description")),
                 Arguments.of(new BrandDTO("s".repeat(51), "Some Name" , "Some Description")),
-
+                Arguments.of(new BrandDTO("-", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("--", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("some--slug", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO(" some-slug", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("some slug", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("some-slug ", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("-some-slug", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("some-slug-", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("some_slug", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("sOmE-sLuG", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("søme-slûg", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO("슬러그-약간의", "Some Name" , "Some Description")),
+                // invalid name
                 Arguments.of(new BrandDTO("some-slug", null , "Some Description")),
-                Arguments.of(new BrandDTO("some-slug", null , "Some Description")),
+                Arguments.of(new BrandDTO("some-slug", "" , "Some Description")),
                 Arguments.of(new BrandDTO("some-slug", "n".repeat(51) , "Some Description")),
-
+                // invalid description
                 Arguments.of(new BrandDTO("some-slug", "Some Name", "d".repeat(2001)))
         );
     }
