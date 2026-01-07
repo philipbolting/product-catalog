@@ -20,7 +20,6 @@ class BrandService {
         if (brandRepository.findByName(dto.name()).isPresent()) {
             throw new IllegalArgumentException("Brand with name " + dto.name() + " already exists");
         }
-        var brand = new Brand(dto.slug(), dto.name(), dto.description());
-        return brandRepository.save(brand);
+        return brandRepository.save(dto.toBrand());
     }
 }
