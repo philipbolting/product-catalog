@@ -100,7 +100,9 @@ class BrandControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail").isEqualTo("Brand slug already exists");
     }
 
     @Test
@@ -113,6 +115,8 @@ class BrandControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.detail").isEqualTo("Brand name already exists");
     }
 }
