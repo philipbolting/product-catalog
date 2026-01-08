@@ -15,10 +15,10 @@ class BrandService {
     @Transactional
     public Brand createBrand(BrandDTO dto) {
         if (brandRepository.findBySlug(dto.slug()).isPresent()) {
-            throw new IllegalArgumentException("Brand with slug " + dto.slug() + " already exists");
+            throw new BrandSlugAlreadyExistsException();
         }
         if (brandRepository.findByName(dto.name()).isPresent()) {
-            throw new IllegalArgumentException("Brand with name " + dto.name() + " already exists");
+            throw new BrandNameAlreadyExistsException();
         }
         return brandRepository.save(dto.toBrand());
     }

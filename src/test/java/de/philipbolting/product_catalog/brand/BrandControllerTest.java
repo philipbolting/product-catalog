@@ -1,6 +1,7 @@
 package de.philipbolting.product_catalog.brand;
 
 import de.philipbolting.product_catalog.SecurityConfig;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -87,5 +88,31 @@ class BrandControllerTest {
                 // invalid description
                 Arguments.of(new BrandDTO("some-slug", "Some Name", "d".repeat(2001)))
         );
+    }
+
+    @Test
+    void createBrand_withDuplicateSlug_shouldReturnBadRequest() {
+        final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
+        when(brandService.createBrand(dto))
+                .thenThrow(new BrandSlugAlreadyExistsException());
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(dto)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void createBrand_withDuplicateName_shouldReturnBadRequest() {
+        final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
+        when(brandService.createBrand(dto))
+                .thenThrow(new BrandNameAlreadyExistsException());
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(dto)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 }
