@@ -53,40 +53,44 @@ class BrandControllerTest {
 
     @ParameterizedTest
     @MethodSource("invalidBrandDTOs")
-    void createBrand_withInvalidDTO_shouldReturnBadRequest(BrandDTO dto) {
+    void createBrand_withInvalidDTO_shouldReturnBadRequest(BrandDTO dto, String pointer) {
         when(brandService.createBrand(dto)).thenReturn(dto.toBrand());
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo(pointer);
     }
 
     static Stream<Arguments> invalidBrandDTOs() {
         return Stream.of(
                 // invalid slug
-                Arguments.of(new BrandDTO(null, "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("s".repeat(51), "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("-", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("--", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("some--slug", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO(" some-slug", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("some slug", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("some-slug ", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("-some-slug", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("some-slug-", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("some_slug", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("sOmE-sLuG", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("søme-slûg", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("슬러그-약간의", "Some Name" , "Some Description")),
+                Arguments.of(new BrandDTO(null, "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("s".repeat(51), "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("-", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("--", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("some--slug", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO(" some-slug", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("some slug", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("some-slug ", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("-some-slug", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("some-slug-", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("some_slug", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("sOmE-sLuG", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("søme-slûg", "Some Name" , "Some Description"), "#/slug"),
+                Arguments.of(new BrandDTO("슬러그-약간의", "Some Name" , "Some Description"), "#/slug"),
                 // invalid name
-                Arguments.of(new BrandDTO("some-slug", null , "Some Description")),
-                Arguments.of(new BrandDTO("some-slug", "" , "Some Description")),
-                Arguments.of(new BrandDTO("some-slug", "n".repeat(51) , "Some Description")),
+                Arguments.of(new BrandDTO("some-slug", null , "Some Description"), "#/name"),
+                Arguments.of(new BrandDTO("some-slug", "" , "Some Description"), "#/name"),
+                Arguments.of(new BrandDTO("some-slug", "n".repeat(51) , "Some Description"), "#/name"),
                 // invalid description
-                Arguments.of(new BrandDTO("some-slug", "Some Name", "d".repeat(2001)))
+                Arguments.of(new BrandDTO("some-slug", "Some Name", "d".repeat(2001)), "#/description")
         );
     }
 
@@ -102,7 +106,9 @@ class BrandControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
-                .jsonPath("$.detail").isEqualTo("Brand slug already exists");
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isEqualTo("Slug already exists")
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/slug");
     }
 
     @Test
@@ -117,6 +123,8 @@ class BrandControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
-                .jsonPath("$.detail").isEqualTo("Brand name already exists");
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isEqualTo("Name already exists")
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
     }
 }
