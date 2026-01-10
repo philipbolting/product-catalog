@@ -45,4 +45,21 @@ class BrandServiceTest {
         assertEquals(dto.name(), brand.getName());
         assertEquals(dto.description(), brand.getDescription());
     }
+
+    @Test
+    void findBrandBySlug_withExistingSlug_shouldReturnBrand() {
+        final var dto = new BrandDTO("some-slug", "Some Brand", "Some description");
+        when(brandRepository.findBySlug(dto.slug())).thenReturn(Optional.of(dto.toBrand()));
+        var brand = brandService.findBrandBySlug(dto.slug());
+        assertNotNull(brand);
+        assertEquals(dto.slug(), brand.getSlug());
+        assertEquals(dto.name(), brand.getName());
+        assertEquals(dto.description(), brand.getDescription());
+    }
+
+    @Test
+    void findBrandBySlug_withUnknownSlug_shouldThrowBrandNotFoundException() {
+        when(brandRepository.findBySlug("some-slug")).thenThrow(new BrandNotFoundException());
+        assertThrows(BrandNotFoundException.class, () -> brandService.findBrandBySlug("some-slug"));
+    }
 }

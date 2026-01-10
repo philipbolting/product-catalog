@@ -2,10 +2,7 @@ package de.philipbolting.product_catalog.brand;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
@@ -27,5 +24,10 @@ class BrandController {
                 .buildAndExpand(brand.getSlug())
                 .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping("{slug}")
+    public BrandDTO findBrandBySlug(@PathVariable String slug) {
+        return BrandDTO.fromBrand(brandService.findBrandBySlug(slug));
     }
 }

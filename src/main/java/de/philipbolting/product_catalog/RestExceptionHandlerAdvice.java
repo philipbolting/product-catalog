@@ -1,6 +1,7 @@
 package de.philipbolting.product_catalog;
 
 import de.philipbolting.product_catalog.brand.BrandNameAlreadyExistsException;
+import de.philipbolting.product_catalog.brand.BrandNotFoundException;
 import de.philipbolting.product_catalog.brand.BrandSlugAlreadyExistsException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.*;
@@ -30,6 +31,13 @@ public class RestExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     ProblemDetail handleBrandNameAlreadyExistsException(BrandNameAlreadyExistsException e) {
         var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setProperty("errors", List.of(new ErrorDetail("Name already exists", "#/name")));
+        return pd;
+    }
+
+    @ExceptionHandler(BrandNotFoundException.class)
+    ProblemDetail handleBrandNotFoundException(BrandNotFoundException e) {
+        var pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        pd.setDetail("No brand found for the given slug");
         return pd;
     }
 

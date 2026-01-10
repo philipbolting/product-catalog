@@ -22,4 +22,8 @@ class BrandService {
         }
         return brandRepository.save(dto.toBrand());
     }
+
+    public Brand findBrandBySlug(String slug) {
+        return brandRepository.findBySlug(slug).orElseThrow(BrandNotFoundException::new);
+    }
 }

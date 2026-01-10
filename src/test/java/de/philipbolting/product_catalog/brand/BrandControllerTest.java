@@ -127,4 +127,18 @@ class BrandControllerTest {
                 .jsonPath("$.errors[0].detail").isEqualTo("Name already exists")
                 .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
     }
+
+    @Test
+    void findBrandBySlug_withExistingSlug_shouldReturnBrand() {
+        final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
+        when(brandService.findBrandBySlug(dto.slug())).thenReturn(dto.toBrand());
+        restTestClient.get().uri("/api/brands/" + dto.slug())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.slug").isEqualTo(dto.slug())
+                .jsonPath("$.name").isEqualTo(dto.name())
+                .jsonPath("$.description").isEqualTo(dto.description());
+    }
 }
