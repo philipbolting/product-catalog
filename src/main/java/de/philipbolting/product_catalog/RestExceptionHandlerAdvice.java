@@ -39,7 +39,6 @@ public class RestExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         List<ErrorDetail> errors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             if (error instanceof FieldError fe) {
-                // TODO: Check pointer value for nested JSON like "#/level1/level3/level3"
                 errors.add(new ErrorDetail(fe.getDefaultMessage(), "#/" + fe.getField()));
             } else {
                 errors.add(new ErrorDetail(error.getDefaultMessage(), error.getObjectName()));
