@@ -4,12 +4,14 @@ package de.philipbolting.product_catalog.brand;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.Objects;
 
 @Entity(name = "Brand")
 @Table(name = "brand")
+@EntityListeners(AuditingEntityListener.class)
 public class Brand {
 
     @Id

@@ -11,7 +11,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-import java.util.Optional;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +35,7 @@ public class BrandControllerIT {
     void createBrand() {
         final String uuid = UUID.randomUUID().toString();
         final var dto = new BrandDTO(uuid, "Brand Name " + uuid, "Brand Description " + uuid);
+        final var requestSentAt = Instant.now();
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -42,9 +43,11 @@ public class BrandControllerIT {
                 .exchange()
                 .expectStatus().isCreated();
 
-        final Optional<Brand> brand = brandRepository.findBySlug(uuid);
-        assertThat(brand).isPresent();
-        assertThat(brand.get().getName()).isEqualTo("Brand Name " + uuid);
-        assertThat(brand.get().getDescription()).isEqualTo("Brand Description " + uuid);
+        final var brand = brandRepository.findBySlug(uuid).orElseThrow(BrandNotFoundException::new);
+        assertThat(brand.getId()).isGreaterThan(0);
+        assertThat(brand.getName()).isEqualTo("Brand Name " + uuid);
+        assertThat(brand.getDescription()).isEqualTo("Brand Description " + uuid);
+        assertThat(brand.getCreated()).isBetween(requestSentAt, Instant.now());
+        assertThat(brand.getLastModified()).isEqualTo(brand.getCreated());
     }
 }
