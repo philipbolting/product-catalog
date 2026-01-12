@@ -1,0 +1,13 @@
+### Create Brand
+POST http://localhost:8080/api/brands
+Content-Type: application/json
+
+{
+  "slug": "some-slug",
+  "name": "Some Name",
+  "description": "Some Description"
+}
+
+### Read Brand
+GET http://localhost:8080/api/brands/some-slug
+Accept: application/json
