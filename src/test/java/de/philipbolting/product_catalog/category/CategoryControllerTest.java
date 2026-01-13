@@ -34,13 +34,13 @@ class CategoryControllerTest {
     @MethodSource("validCategoryDTOs")
     void createCategory_withValidDTO_shouldReturnLocationOfCreatedCategory(CategoryDTO dto) {
         when(categoryService.createCategory(dto)).thenReturn(dto.toCategory());
-        restTestClient.post().uri("/api/categorys")
+        restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().location("http://localhost/api/categorys/" + dto.slug());
+                .expectHeader().location("http://localhost/api/categories/" + dto.slug());
     }
 
     static Stream<Arguments> validCategoryDTOs() {
@@ -57,7 +57,7 @@ class CategoryControllerTest {
     @MethodSource("invalidCategoryDTOs")
     void createCategory_withInvalidDTO_shouldReturnBadRequest(CategoryDTO dto, String pointer) {
         when(categoryService.createCategory(dto)).thenReturn(dto.toCategory());
-        restTestClient.post().uri("/api/categorys")
+        restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
@@ -101,7 +101,7 @@ class CategoryControllerTest {
         final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
         when(categoryService.createCategory(dto))
                 .thenThrow(new SlugAlreadyExistsException());
-        restTestClient.post().uri("/api/categorys")
+        restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
@@ -118,7 +118,7 @@ class CategoryControllerTest {
         final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
         when(categoryService.createCategory(dto))
                 .thenThrow(new NameAlreadyExistsException());
-        restTestClient.post().uri("/api/categorys")
+        restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
@@ -134,7 +134,7 @@ class CategoryControllerTest {
     void findCategoryBySlug_withExistingSlug_shouldReturnCategory() {
         final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
         when(categoryService.findCategoryBySlug(dto.slug())).thenReturn(dto.toCategory());
-        restTestClient.get().uri("/api/categorys/" + dto.slug())
+        restTestClient.get().uri("/api/categories/" + dto.slug())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()

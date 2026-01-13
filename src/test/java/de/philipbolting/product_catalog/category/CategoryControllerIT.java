@@ -37,7 +37,7 @@ public class CategoryControllerIT {
         final String uuid = UUID.randomUUID().toString();
         final var dto = new CategoryDTO(uuid, "Category Name " + uuid, "Category Description " + uuid);
         final var requestSentAt = Instant.now();
-        restTestClient.post().uri("/api/categorys")
+        restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(dto)
