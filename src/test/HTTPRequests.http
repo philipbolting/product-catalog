@@ -1,13 +1,35 @@
+### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+### Brand API
+### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ### Create Brand
 POST http://localhost:8080/api/brands
 Content-Type: application/json
 
 {
-  "slug": "some-slug",
-  "name": "Some Name",
-  "description": "Some Description"
+  "slug": "some-brand-slug",
+  "name": "Some Brand Name",
+  "description": "Some Brand Description"
 }
 
 ### Read Brand
-GET http://localhost:8080/api/brands/some-slug
+GET http://localhost:8080/api/brands/some-brand-slug
+Accept: application/json
+
+### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+### Category API
+### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+### Create Category
+POST http://localhost:8080/api/categories
+Content-Type: application/json
+
+{
+  "slug": "some-category-slug",
+  "name": "Some Category Name",
+  "description": "Some Category Description"
+}
+
+### Read Category
+GET http://localhost:8080/api/categories/some-category-slug
 Accept: application/json
