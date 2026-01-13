@@ -23,14 +23,14 @@ class BrandServiceTest {
     void createBrand_withDuplicateSlug_shouldThrowException() {
         final var dto = new BrandDTO("some-slug", "Some Brand", "Some description");
         when(brandRepository.findBySlug(dto.slug())).thenReturn(Optional.of(dto.toBrand()));
-        var exception = assertThrows(BrandSlugAlreadyExistsException.class, () -> brandService.createBrand(dto));
+        assertThrows(BrandSlugAlreadyExistsException.class, () -> brandService.createBrand(dto));
     }
 
     @Test
     void createBrand_withDuplicateName_shouldThrowException() {
         final var dto = new BrandDTO("some-slug", "Some Brand", "Some description");
         when(brandRepository.findByName(dto.name())).thenReturn(Optional.of(dto.toBrand()));
-        var exception = assertThrows(BrandNameAlreadyExistsException.class, () -> brandService.createBrand(dto));
+        assertThrows(BrandNameAlreadyExistsException.class, () -> brandService.createBrand(dto));
     }
 
     @Test
