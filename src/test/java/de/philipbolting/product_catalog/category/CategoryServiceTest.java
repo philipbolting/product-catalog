@@ -1,5 +1,8 @@
 package de.philipbolting.product_catalog.category;
 
+import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.NotFoundException;
+import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,14 +26,14 @@ class CategoryServiceTest {
     void createCategory_withDuplicateSlug_shouldThrowException() {
         final var dto = new CategoryDTO("some-slug", "Some Category", "Some description");
         when(categoryRepository.findBySlug(dto.slug())).thenReturn(Optional.of(dto.toCategory()));
-        assertThrows(CategorySlugAlreadyExistsException.class, () -> categoryService.createCategory(dto));
+        assertThrows(SlugAlreadyExistsException.class, () -> categoryService.createCategory(dto));
     }
 
     @Test
     void createCategory_withDuplicateName_shouldThrowException() {
         final var dto = new CategoryDTO("some-slug", "Some Category", "Some description");
         when(categoryRepository.findByName(dto.name())).thenReturn(Optional.of(dto.toCategory()));
-        assertThrows(CategoryNameAlreadyExistsException.class, () -> categoryService.createCategory(dto));
+        assertThrows(NameAlreadyExistsException.class, () -> categoryService.createCategory(dto));
     }
 
     @Test
@@ -59,7 +62,7 @@ class CategoryServiceTest {
 
     @Test
     void findCategoryBySlug_withUnknownSlug_shouldThrowCategoryNotFoundException() {
-        when(categoryRepository.findBySlug("some-slug")).thenThrow(new CategoryNotFoundException());
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryBySlug("some-slug"));
+        when(categoryRepository.findBySlug("some-slug")).thenThrow(new NotFoundException());
+        assertThrows(NotFoundException.class, () -> categoryService.findCategoryBySlug("some-slug"));
     }
 }

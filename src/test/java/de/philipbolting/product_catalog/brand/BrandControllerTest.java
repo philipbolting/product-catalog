@@ -1,5 +1,7 @@
 package de.philipbolting.product_catalog.brand;
 
+import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import de.philipbolting.product_catalog.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -98,7 +100,7 @@ class BrandControllerTest {
     void createBrand_withDuplicateSlug_shouldReturnBadRequest() {
         final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
         when(brandService.createBrand(dto))
-                .thenThrow(new BrandSlugAlreadyExistsException());
+                .thenThrow(new SlugAlreadyExistsException());
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -115,7 +117,7 @@ class BrandControllerTest {
     void createBrand_withDuplicateName_shouldReturnBadRequest() {
         final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
         when(brandService.createBrand(dto))
-                .thenThrow(new BrandNameAlreadyExistsException());
+                .thenThrow(new NameAlreadyExistsException());
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

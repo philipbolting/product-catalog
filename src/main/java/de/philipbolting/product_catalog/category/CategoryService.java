@@ -1,5 +1,8 @@
 package de.philipbolting.product_catalog.category;
 
+import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.NotFoundException;
+import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +18,15 @@ class CategoryService {
     @Transactional
     public Category createCategory(CategoryDTO dto) {
         if (categoryRepository.findBySlug(dto.slug()).isPresent()) {
-            throw new CategorySlugAlreadyExistsException();
+            throw new SlugAlreadyExistsException();
         }
         if (categoryRepository.findByName(dto.name()).isPresent()) {
-            throw new CategoryNameAlreadyExistsException();
+            throw new NameAlreadyExistsException();
         }
         return categoryRepository.save(dto.toCategory());
     }
 
     public Category findCategoryBySlug(String slug) {
-        return categoryRepository.findBySlug(slug).orElseThrow(CategoryNotFoundException::new);
+        return categoryRepository.findBySlug(slug).orElseThrow(NotFoundException::new);
     }
 }

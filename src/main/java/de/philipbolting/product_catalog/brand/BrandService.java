@@ -1,5 +1,8 @@
 package de.philipbolting.product_catalog.brand;
 
+import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.NotFoundException;
+import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +18,15 @@ class BrandService {
     @Transactional
     public Brand createBrand(BrandDTO dto) {
         if (brandRepository.findBySlug(dto.slug()).isPresent()) {
-            throw new BrandSlugAlreadyExistsException();
+            throw new SlugAlreadyExistsException();
         }
         if (brandRepository.findByName(dto.name()).isPresent()) {
-            throw new BrandNameAlreadyExistsException();
+            throw new NameAlreadyExistsException();
         }
         return brandRepository.save(dto.toBrand());
     }
 
     public Brand findBrandBySlug(String slug) {
-        return brandRepository.findBySlug(slug).orElseThrow(BrandNotFoundException::new);
+        return brandRepository.findBySlug(slug).orElseThrow(NotFoundException::new);
     }
 }

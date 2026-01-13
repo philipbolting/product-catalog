@@ -1,8 +1,5 @@
-package de.philipbolting.product_catalog;
+package de.philipbolting.product_catalog.error;
 
-import de.philipbolting.product_catalog.brand.BrandNameAlreadyExistsException;
-import de.philipbolting.product_catalog.brand.BrandNotFoundException;
-import de.philipbolting.product_catalog.brand.BrandSlugAlreadyExistsException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
@@ -20,24 +17,24 @@ public class RestExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     private record ErrorDetail(String detail, String pointer) {}
 
-    @ExceptionHandler(BrandSlugAlreadyExistsException.class)
-    ProblemDetail handleBrandSlugAlreadyExistsException(BrandSlugAlreadyExistsException e) {
+    @ExceptionHandler(SlugAlreadyExistsException.class)
+    ProblemDetail handleSlugAlreadyExistsException(SlugAlreadyExistsException e) {
         var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setProperty("errors", List.of(new ErrorDetail("Slug already exists", "#/slug")));
         return pd;
     }
 
-    @ExceptionHandler(BrandNameAlreadyExistsException.class)
-    ProblemDetail handleBrandNameAlreadyExistsException(BrandNameAlreadyExistsException e) {
+    @ExceptionHandler(NameAlreadyExistsException.class)
+    ProblemDetail handleNameAlreadyExistsException(NameAlreadyExistsException e) {
         var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setProperty("errors", List.of(new ErrorDetail("Name already exists", "#/name")));
         return pd;
     }
 
-    @ExceptionHandler(BrandNotFoundException.class)
-    ProblemDetail handleBrandNotFoundException(BrandNotFoundException e) {
+    @ExceptionHandler(NotFoundException.class)
+    ProblemDetail handleNotFoundException(NotFoundException e) {
         var pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        pd.setDetail("No brand found for the given slug");
+        pd.setDetail("Not found");
         return pd;
     }
 

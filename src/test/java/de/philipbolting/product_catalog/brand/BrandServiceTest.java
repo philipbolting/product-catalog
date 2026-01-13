@@ -1,5 +1,8 @@
 package de.philipbolting.product_catalog.brand;
 
+import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.NotFoundException;
+import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,14 +26,14 @@ class BrandServiceTest {
     void createBrand_withDuplicateSlug_shouldThrowException() {
         final var dto = new BrandDTO("some-slug", "Some Brand", "Some description");
         when(brandRepository.findBySlug(dto.slug())).thenReturn(Optional.of(dto.toBrand()));
-        assertThrows(BrandSlugAlreadyExistsException.class, () -> brandService.createBrand(dto));
+        assertThrows(SlugAlreadyExistsException.class, () -> brandService.createBrand(dto));
     }
 
     @Test
     void createBrand_withDuplicateName_shouldThrowException() {
         final var dto = new BrandDTO("some-slug", "Some Brand", "Some description");
         when(brandRepository.findByName(dto.name())).thenReturn(Optional.of(dto.toBrand()));
-        assertThrows(BrandNameAlreadyExistsException.class, () -> brandService.createBrand(dto));
+        assertThrows(NameAlreadyExistsException.class, () -> brandService.createBrand(dto));
     }
 
     @Test
@@ -59,7 +62,7 @@ class BrandServiceTest {
 
     @Test
     void findBrandBySlug_withUnknownSlug_shouldThrowBrandNotFoundException() {
-        when(brandRepository.findBySlug("some-slug")).thenThrow(new BrandNotFoundException());
-        assertThrows(BrandNotFoundException.class, () -> brandService.findBrandBySlug("some-slug"));
+        when(brandRepository.findBySlug("some-slug")).thenThrow(new NotFoundException());
+        assertThrows(NotFoundException.class, () -> brandService.findBrandBySlug("some-slug"));
     }
 }
