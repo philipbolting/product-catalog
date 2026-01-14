@@ -17,6 +17,10 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_category")
     @SequenceGenerator(name = "seq_category", allocationSize = 1)
     private long id;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+    private int sortOrder;
     private String slug;
     private String name;
     private String description;
@@ -29,6 +33,22 @@ public class Category {
     }
 
     public Category(String slug, String name, String description) {
+        this.sortOrder = 0;
+        this.slug = slug;
+        this.name = name;
+        this.description = description;
+    }
+
+    public Category(int sortOrder, String slug, String name, String description) {
+        this.sortOrder = sortOrder;
+        this.slug = slug;
+        this.name = name;
+        this.description = description;
+    }
+
+    public Category(Category parent, int sortOrder, String slug, String name, String description) {
+        this.parent = parent;
+        this.sortOrder = sortOrder;
         this.slug = slug;
         this.name = name;
         this.description = description;
@@ -40,6 +60,22 @@ public class Category {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Category getParent() {
+        return parent;
+    }
+
+    public void setParent(Category parentCategory) {
+        this.parent = parentCategory;
+    }
+
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public String getSlug() {

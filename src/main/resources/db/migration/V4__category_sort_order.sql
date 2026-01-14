@@ -1,0 +1,1 @@
+ALTER TABLE category ADD sort_order INT NOT NULL DEFAULT 0;
