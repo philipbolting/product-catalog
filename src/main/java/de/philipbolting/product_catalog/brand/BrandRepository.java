@@ -6,5 +6,5 @@ import java.util.Optional;
 
 interface BrandRepository extends CrudRepository<Brand, Long> {
     Optional<Brand> findBySlug(String slug);
-    Optional<Brand> findByName(String slug);
+    Optional<Brand> findByName(String name);
 }
