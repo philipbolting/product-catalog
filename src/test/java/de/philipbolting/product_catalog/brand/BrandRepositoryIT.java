@@ -57,8 +57,7 @@ class BrandRepositoryIT {
     }
 
     @Test
-    @Disabled("LastModified is unexpectedly not updated by the second call to save().")
-    void shouldUpdateLastModified() {
+    void shouldSetCreatedAndUpdateLastModified() {
         final var uuid = UUID.randomUUID();
         final var createdAt = Instant.parse("2026-01-02T03:04:05Z");
         final var modifiedAt = Instant.parse("2027-02-03T04:05:06Z");
@@ -66,12 +65,14 @@ class BrandRepositoryIT {
         var brand = new Brand("slug-" + uuid, "Brand " + uuid, "");
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(createdAt));
         brandRepository.save(brand);
+        entityManager.flush();
         assertEquals(createdAt, brand.getCreated());
         assertEquals(createdAt, brand.getLastModified());
 
         brand.setName("Modified " + modifiedAt);
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(modifiedAt));
         brandRepository.save(brand);
+        entityManager.flush();
         assertEquals(createdAt, brand.getCreated());
         assertEquals(modifiedAt, brand.getLastModified());
     }
