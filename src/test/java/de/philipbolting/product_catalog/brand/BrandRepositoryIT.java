@@ -1,6 +1,9 @@
 package de.philipbolting.product_catalog.brand;
 
 import de.philipbolting.product_catalog.JpaConfig;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,7 +25,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @DataJpaTest
@@ -43,6 +47,9 @@ class BrandRepositoryIT {
 
     @MockitoSpyBean
     private AuditingHandler handler;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
@@ -69,4 +76,55 @@ class BrandRepositoryIT {
         assertEquals(modifiedAt, brand.getLastModified());
     }
 
+    @Test
+    void save_withDuplicateSlug_throwsConstraintViolationException() {
+        final var duplicateSlug = UUID.randomUUID().toString();
+        final var brand1 =  new Brand(duplicateSlug, "Brand 1", "");
+        final var brand2 =  new Brand(duplicateSlug, "Brand 2", "");
+        brandRepository.save(brand1);
+        final var ex = assertThrowsExactly(ConstraintViolationException.class, () -> {
+            brandRepository.save(brand2);
+            entityManager.flush();
+        });
+        assertEquals(org.hibernate.exception.ConstraintViolationException.ConstraintKind.UNIQUE, ex.getKind());
+        assertEquals("brand_slug_key", ex.getConstraintName());
+        assertThat(ex.getMessage()).contains(duplicateSlug);
+    }
+
+    @Test
+    void save_withUniqueSlug_doesNotThrowException() {
+        final var brand1 =  new Brand("slug-1", "Brand 1", "");
+        final var brand2 =  new Brand("slug-2", "Brand 2", "");
+        brandRepository.save(brand1);
+        assertDoesNotThrow(() -> {
+            brandRepository.save(brand2);
+            entityManager.flush();
+        });
+    }
+
+    @Test
+    void save_withDuplicateName_throwsConstraintViolationException() {
+        final var duplicateName = UUID.randomUUID().toString();
+        final var brand1 =  new Brand("slug-1", duplicateName, "");
+        final var brand2 =  new Brand("slug-2", duplicateName, "");
+        brandRepository.save(brand1);
+        final var ex = assertThrowsExactly(ConstraintViolationException.class, () -> {
+            brandRepository.save(brand2);
+            entityManager.flush();
+        });
+        assertEquals(org.hibernate.exception.ConstraintViolationException.ConstraintKind.UNIQUE, ex.getKind());
+        assertEquals("brand_name_key", ex.getConstraintName());
+        assertThat(ex.getMessage()).contains(duplicateName);
+    }
+
+    @Test
+    void save_withUniqueName_doesNotThrowException() {
+        final var brand1 =  new Brand("slug-1", "Brand 1", "");
+        final var brand2 =  new Brand("slug-2", "Brand 2", "");
+        brandRepository.save(brand1);
+        assertDoesNotThrow(() -> {
+            brandRepository.save(brand2);
+            entityManager.flush();
+        });
+    }
 }
