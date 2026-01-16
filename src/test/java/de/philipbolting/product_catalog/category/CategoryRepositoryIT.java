@@ -57,8 +57,7 @@ class CategoryRepositoryIT {
     }
 
     @Test
-    @Disabled("LastModified is unexpectedly not updated by the second call to save().")
-    void shouldUpdateLastModified() {
+    void shouldSetCreatedAndUpdateLastModified() {
         final var uuid = UUID.randomUUID();
         final var createdAt = Instant.parse("2026-01-02T03:04:05Z");
         final var modifiedAt = Instant.parse("2027-02-03T04:05:06Z");
@@ -66,12 +65,14 @@ class CategoryRepositoryIT {
         var category = new Category("slug-" + uuid, "Category " + uuid, "");
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(createdAt));
         categoryRepository.save(category);
+        entityManager.flush();
         assertEquals(createdAt, category.getCreated());
         assertEquals(createdAt, category.getLastModified());
 
         category.setName("Modified " + modifiedAt);
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(modifiedAt));
         categoryRepository.save(category);
+        entityManager.flush();
         assertEquals(createdAt, category.getCreated());
         assertEquals(modifiedAt, category.getLastModified());
     }
