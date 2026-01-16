@@ -1,6 +1,9 @@
 package de.philipbolting.product_catalog.category;
 
 import de.philipbolting.product_catalog.JpaConfig;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,7 +25,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @DataJpaTest
@@ -43,6 +47,9 @@ class CategoryRepositoryIT {
 
     @MockitoSpyBean
     private AuditingHandler handler;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
@@ -69,4 +76,69 @@ class CategoryRepositoryIT {
         assertEquals(modifiedAt, category.getLastModified());
     }
 
+    @Test
+    void save_withDuplicateSlugInSameCategory_throwsConstraintViolationException() {
+        final var duplicateSlug = UUID.randomUUID().toString();
+        var parentCategory = new Category(1, "slug-parent", "Parent Category", "");
+        var category1 = new Category(parentCategory, 1, duplicateSlug, "Child Category 1.1", "");
+        var category2 = new Category(parentCategory,2, duplicateSlug, "Child Category 1.2", "");
+        categoryRepository.save(parentCategory);
+        categoryRepository.save(category1);
+        final var ex = assertThrowsExactly(ConstraintViolationException.class, () -> {
+            categoryRepository.save(category2);
+            entityManager.flush();
+        });
+        assertEquals(ConstraintViolationException.ConstraintKind.UNIQUE, ex.getKind());
+        assertEquals("category_parent_id_slug_key", ex.getConstraintName());
+        assertThat(ex.getMessage()).contains(duplicateSlug);
+    }
+
+    @Test
+    void save_withDuplicateSlugInDifferentCategories_doesNotThrowException() {
+        final var duplicateSlug = UUID.randomUUID().toString();
+        var parentCategory1 = new Category(1, "slug-parent-1", "Parent Category 1", "");
+        var parentCategory2 = new Category(2, "slug-parent-2", "Parent Category 2", "");
+        var category1 = new Category(parentCategory1, 1, duplicateSlug, "Child Category 1.1", "");
+        var category2 = new Category(parentCategory2,2, duplicateSlug, "Child Category 2.1", "");
+        categoryRepository.save(parentCategory1);
+        categoryRepository.save(parentCategory2);
+        categoryRepository.save(category1);
+        assertDoesNotThrow(() -> {
+            categoryRepository.save(category2);
+            entityManager.flush();
+        });
+    }
+
+    @Test
+    void save_withDuplicateNameInSameCategory_throwsConstraintViolationException() {
+        final var duplicateName = UUID.randomUUID().toString();
+        var parentCategory = new Category(1, "slug-parent", "Parent Category", "");
+        var category1 = new Category(parentCategory, 1, "slug-child-1", duplicateName, "");
+        var category2 = new Category(parentCategory,2, "slug-child-2", duplicateName, "");
+        categoryRepository.save(parentCategory);
+        categoryRepository.save(category1);
+        final var ex = assertThrowsExactly(ConstraintViolationException.class, () -> {
+            categoryRepository.save(category2);
+            entityManager.flush();
+        });
+        assertEquals(ConstraintViolationException.ConstraintKind.UNIQUE, ex.getKind());
+        assertEquals("category_parent_id_name_key", ex.getConstraintName());
+        assertThat(ex.getMessage()).contains(duplicateName);
+    }
+
+    @Test
+    void save_withDuplicateNameInDifferentCategories_doesNotThrowException() {
+        final var duplicateName = UUID.randomUUID().toString();
+        var parentCategory1 = new Category(1, "slug-parent-1", "Parent Category 1", "");
+        var parentCategory2 = new Category(2, "slug-parent-2", "Parent Category 2", "");
+        var category1 = new Category(parentCategory1, 1, "slug-child-1", duplicateName, "");
+        var category2 = new Category(parentCategory2,2, "slug-child-2", duplicateName, "");
+        categoryRepository.save(parentCategory1);
+        categoryRepository.save(parentCategory2);
+        categoryRepository.save(category1);
+        assertDoesNotThrow(() -> {
+            categoryRepository.save(category2);
+            entityManager.flush();
+        });
+    }
 }
