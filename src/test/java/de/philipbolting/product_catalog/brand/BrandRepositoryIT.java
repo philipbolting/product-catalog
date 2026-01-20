@@ -61,19 +61,18 @@ class BrandRepositoryIT {
         final var createdAt = Instant.parse("2026-01-02T03:04:05Z");
         final var modifiedAt = Instant.parse("2027-02-03T04:05:06Z");
 
-        var brand = new Brand("slug-" + uuid, "Brand " + uuid, "");
+        final var brand = new Brand("slug-" + uuid, "Brand " + uuid, "");
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(createdAt));
-        brandRepository.save(brand);
-        entityManager.flush();
-        assertEquals(createdAt, brand.getCreated());
-        assertEquals(createdAt, brand.getLastModified());
+        final var savedBrand = brandRepository.save(brand);
+        assertEquals(createdAt, savedBrand.getCreated());
+        assertEquals(createdAt, savedBrand.getLastModified());
 
-        brand.setName("Modified " + modifiedAt);
+        savedBrand.setName("Modified " + modifiedAt);
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(modifiedAt));
-        brandRepository.save(brand);
-        entityManager.flush();
-        assertEquals(createdAt, brand.getCreated());
-        assertEquals(modifiedAt, brand.getLastModified());
+        final var modifiedBrand = brandRepository.save(savedBrand);
+        entityManager.flush(); // required to update lastModified
+        assertEquals(createdAt, modifiedBrand.getCreated());
+        assertEquals(modifiedAt, modifiedBrand.getLastModified());
     }
 
     @Test

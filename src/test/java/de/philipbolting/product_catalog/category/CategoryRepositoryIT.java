@@ -61,19 +61,18 @@ class CategoryRepositoryIT {
         final var createdAt = Instant.parse("2026-01-02T03:04:05Z");
         final var modifiedAt = Instant.parse("2027-02-03T04:05:06Z");
 
-        var category = new Category("slug-" + uuid, "Category " + uuid, "");
+        final var category = new Category("slug-" + uuid, "Category " + uuid, "");
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(createdAt));
-        categoryRepository.save(category);
-        entityManager.flush();
-        assertEquals(createdAt, category.getCreated());
-        assertEquals(createdAt, category.getLastModified());
+        final var savedCategory = categoryRepository.save(category);
+        assertEquals(createdAt, savedCategory.getCreated());
+        assertEquals(createdAt, savedCategory.getLastModified());
 
-        category.setName("Modified " + modifiedAt);
+        savedCategory.setName("Modified " + modifiedAt);
         when(dateTimeProvider.getNow()).thenReturn(Optional.of(modifiedAt));
-        categoryRepository.save(category);
-        entityManager.flush();
-        assertEquals(createdAt, category.getCreated());
-        assertEquals(modifiedAt, category.getLastModified());
+        final var modifiedCategory = categoryRepository.save(savedCategory);
+        entityManager.flush(); // required to update lastModified
+        assertEquals(createdAt, modifiedCategory.getCreated());
+        assertEquals(modifiedAt, modifiedCategory.getLastModified());
     }
 
     @Test
