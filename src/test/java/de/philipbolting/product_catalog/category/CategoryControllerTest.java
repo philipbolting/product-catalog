@@ -99,12 +99,17 @@ class CategoryControllerTest {
     @Test
     void createCategory_withDuplicateSlug_shouldReturnBadRequest() {
         final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
-        when(categoryService.createCategory(dto))
-                .thenThrow(new SlugAlreadyExistsException());
+        when(categoryService.createCategory(dto)).thenThrow(new SlugAlreadyExistsException());
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
+                .body("""
+                      {
+                          "slug": "some-slug",
+                          "name": "Some Name",
+                          "description": "Some Description"
+                      }
+                      """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -116,12 +121,17 @@ class CategoryControllerTest {
     @Test
     void createCategory_withDuplicateName_shouldReturnBadRequest() {
         final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
-        when(categoryService.createCategory(dto))
-                .thenThrow(new NameAlreadyExistsException());
+        when(categoryService.createCategory(dto)).thenThrow(new NameAlreadyExistsException());
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
+                .body("""
+                      {
+                          "slug": "some-slug",
+                          "name": "Some Name",
+                          "description": "Some Description"
+                      }
+                      """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -132,15 +142,18 @@ class CategoryControllerTest {
 
     @Test
     void findCategoryBySlug_withExistingSlug_shouldReturnCategory() {
-        final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
-        when(categoryService.findCategoryBySlug(dto.slug())).thenReturn(dto.toCategory());
-        restTestClient.get().uri("/api/categories/" + dto.slug())
+        final String expectedSlug = "some-slug";
+        final String expectedName = "Some Name";
+        final String expectedDescription = "Some Description";
+        final var category = new Category(expectedSlug, expectedName, expectedDescription);
+        when(categoryService.findCategoryBySlug(expectedSlug)).thenReturn(category);
+        restTestClient.get().uri("/api/categories/" + expectedSlug)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.slug").isEqualTo(dto.slug())
-                .jsonPath("$.name").isEqualTo(dto.name())
-                .jsonPath("$.description").isEqualTo(dto.description());
+                .jsonPath("$.slug").isEqualTo(expectedSlug)
+                .jsonPath("$.name").isEqualTo(expectedName)
+                .jsonPath("$.description").isEqualTo(expectedDescription);
     }
 }
