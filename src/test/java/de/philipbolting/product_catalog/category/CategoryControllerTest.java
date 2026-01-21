@@ -5,7 +5,6 @@ import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -30,86 +29,268 @@ class CategoryControllerTest {
     @MockitoBean
     private CategoryService categoryService;
 
-    @ParameterizedTest
-    @MethodSource("validCategoryDTOs")
-    void createCategory_withValidDTO_shouldReturnLocationOfCreatedCategory(CategoryDTO dto) {
-        when(categoryService.createCategory(dto)).thenReturn(dto.toCategory());
-        restTestClient.post().uri("/api/categories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().location("http://localhost/api/categories/" + dto.slug());
+    static Stream<String> validSlugs() {
+        return Stream.of(
+                "some-slug",
+                "s",
+                "s".repeat(50));
     }
 
-    static Stream<Arguments> validCategoryDTOs() {
+    static Stream<String> invalidSlugs() {
         return Stream.of(
-                Arguments.of(new CategoryDTO("some-slug", "Some Name" , "Some Description")),
-                Arguments.of(new CategoryDTO("s", "n" , "d")),
-                Arguments.of(new CategoryDTO("s".repeat( 50), "n".repeat( 50) , "d".repeat( 2000))),
-                Arguments.of(new CategoryDTO("s", "n" , "")),
-                Arguments.of(new CategoryDTO("s", "n" , null))
+                "",
+                "s".repeat(51),
+                "-",
+                "--",
+                "some--slug",
+                " some-slug",
+                "some slug",
+                "some-slug ",
+                "-some-slug",
+                "some-slug-",
+                "some_slug",
+                "sOmE-sLuG",
+                "søme-slûg",
+                "슬러그-약간의"
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidCategoryDTOs")
-    void createCategory_withInvalidDTO_shouldReturnBadRequest(CategoryDTO dto, String pointer) {
-        when(categoryService.createCategory(dto)).thenReturn(dto.toCategory());
+    static Stream<String> validNames() {
+        return Stream.of(
+                "Some Name",
+                "n",
+                "n".repeat(50)
+        );
+    }
+
+    static Stream<String> invalidNames() {
+        return Stream.of(
+                "",
+                "n".repeat(51)
+        );
+    }
+
+    static Stream<String> validDescriptions() {
+        return Stream.of(
+                "Some Description",
+                "",
+                "d",
+                "d".repeat(50)
+        );
+    }
+
+    @Test
+    void createCategory_withoutSlug_shouldReturnBadRequest() {
+        final var dto = new CategoryDTO(null, "Some Name", "Some Description");
+        final var category = new Category(null, "Some Name", "Some Description");
+        when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
+                .body("""
+                        {
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.errors").isNotEmpty()
                 .jsonPath("$.errors[0].detail").isNotEmpty()
-                .jsonPath("$.errors[0].pointer").isEqualTo(pointer);
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/slug");
     }
 
-    static Stream<Arguments> invalidCategoryDTOs() {
-        return Stream.of(
-                // invalid slug
-                Arguments.of(new CategoryDTO(null, "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("s".repeat(51), "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("-", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("--", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("some--slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO(" some-slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("some slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("some-slug ", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("-some-slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("some-slug-", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("some_slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("sOmE-sLuG", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("søme-slûg", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new CategoryDTO("슬러그-약간의", "Some Name" , "Some Description"), "#/slug"),
-                // invalid name
-                Arguments.of(new CategoryDTO("some-slug", null , "Some Description"), "#/name"),
-                Arguments.of(new CategoryDTO("some-slug", "" , "Some Description"), "#/name"),
-                Arguments.of(new CategoryDTO("some-slug", "n".repeat(51) , "Some Description"), "#/name"),
-                // invalid description
-                Arguments.of(new CategoryDTO("some-slug", "Some Name", "d".repeat(2001)), "#/description")
-        );
+    @ParameterizedTest
+    @MethodSource("validSlugs")
+    void createCategory_withValidSlug_shouldReturnLocationOfCreatedCategory(String slug) {
+        final var dto = new CategoryDTO(slug, "Some Name", "Some Description");
+        final var category = new Category(slug, "Some Name", "Some Description");
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "%s",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """.formatted(slug))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/categories/" + slug);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSlugs")
+    void createCategory_withInvalidSlug_shouldReturnBadRequest(String slug) {
+        final var dto = new CategoryDTO(slug, "Some Name", "Some Description");
+        final var category = new Category(slug, "Some Name", "Some Description");
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "%s",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """.formatted(slug))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/slug");
+    }
+
+    @Test
+    void createCategory_withoutName_shouldReturnBadRequest() {
+        final var dto = new CategoryDTO("some-slug", null, "Some Description");
+        final var category = new Category("some-slug", null, "Some Description");
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "description": "Some Description"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
+    }
+
+    @ParameterizedTest
+    @MethodSource("validNames")
+    void createCategory_withValidName_shouldReturnLocationOfCreatedCategory(String name) {
+        final var dto = new CategoryDTO("some-slug", name, "Some Description");
+        final var category = new Category("some-slug", name, "Some Description");
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "%s",
+                            "description": "Some Description"
+                        }
+                        """.formatted(name))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/categories/some-slug");
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidNames")
+    void createCategory_withInvalidName_shouldReturnBadRequest(String name) {
+        final var dto = new CategoryDTO("some-slug", name, "Some Description");
+        final var category = new Category("some-slug", name, "Some Description");
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "%s",
+                            "description": "Some Description"
+                        }
+                        """.formatted(name))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
+    }
+
+    @Test
+    void createCategory_withoutDescription_shouldReturnLocationOfCreatedCategory() {
+        final var dto = new CategoryDTO("some-slug", "Some Name", null);
+        final var category = new Category("some-slug", "Some Name", null);
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/categories/some-slug");
+    }
+
+    @ParameterizedTest
+    @MethodSource("validDescriptions")
+    void createCategory_withValidDescription_shouldReturnLocationOfCreatedCategory(String description) {
+        final var dto = new CategoryDTO("some-slug", "Some Name", description);
+        final var category = new Category("some-slug", "Some Name", description);
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "%s"
+                        }
+                        """.formatted(description))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/categories/some-slug");
+    }
+
+    @Test
+    void createCategory_withInvalidDescription_shouldReturnBadRequest() {
+        final var invalidDescription = "d".repeat(2001);
+        final var dto = new CategoryDTO("some-slug", "Some Name", invalidDescription);
+        final var category = new Category("some-slug", "Some Name", invalidDescription);
+        when(categoryService.createCategory(dto)).thenReturn(category);
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "%s"
+                        }
+                        """.formatted(invalidDescription))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/description");
     }
 
     @Test
     void createCategory_withDuplicateSlug_shouldReturnBadRequest() {
-        final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
+        final var dto = new CategoryDTO("some-slug", "Some Name", "Some Description");
         when(categoryService.createCategory(dto)).thenThrow(new SlugAlreadyExistsException());
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body("""
-                      {
-                          "slug": "some-slug",
-                          "name": "Some Name",
-                          "description": "Some Description"
-                      }
-                      """)
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -120,18 +301,18 @@ class CategoryControllerTest {
 
     @Test
     void createCategory_withDuplicateName_shouldReturnBadRequest() {
-        final var dto = new CategoryDTO("some-slug", "Some Name" , "Some Description");
+        final var dto = new CategoryDTO("some-slug", "Some Name", "Some Description");
         when(categoryService.createCategory(dto)).thenThrow(new NameAlreadyExistsException());
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body("""
-                      {
-                          "slug": "some-slug",
-                          "name": "Some Name",
-                          "description": "Some Description"
-                      }
-                      """)
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
