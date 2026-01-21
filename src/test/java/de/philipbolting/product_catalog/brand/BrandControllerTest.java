@@ -1,11 +1,10 @@
 package de.philipbolting.product_catalog.brand;
 
+import de.philipbolting.product_catalog.SecurityConfig;
 import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
-import de.philipbolting.product_catalog.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -30,81 +29,269 @@ class BrandControllerTest {
     @MockitoBean
     private BrandService brandService;
 
-    @ParameterizedTest
-    @MethodSource("validBrandDTOs")
-    void createBrand_withValidDTO_shouldReturnLocationOfCreatedBrand(BrandDTO dto) {
-        when(brandService.createBrand(dto)).thenReturn(dto.toBrand());
-        restTestClient.post().uri("/api/brands")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().location("http://localhost/api/brands/" + dto.slug());
-    }
-
-    static Stream<Arguments> validBrandDTOs() {
+    static Stream<String> validSlugs() {
         return Stream.of(
-                Arguments.of(new BrandDTO("some-slug", "Some Name" , "Some Description")),
-                Arguments.of(new BrandDTO("s", "n" , "d")),
-                Arguments.of(new BrandDTO("s".repeat( 50), "n".repeat( 50) , "d".repeat( 2000))),
-                Arguments.of(new BrandDTO("s", "n" , "")),
-                Arguments.of(new BrandDTO("s", "n" , null))
+                "some-slug",
+                "s",
+                "s".repeat(50)
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidBrandDTOs")
-    void createBrand_withInvalidDTO_shouldReturnBadRequest(BrandDTO dto, String pointer) {
-        when(brandService.createBrand(dto)).thenReturn(dto.toBrand());
+    static Stream<String> invalidSlugs() {
+        return Stream.of(
+                "",
+                "s".repeat(51),
+                "-",
+                "--",
+                "some--slug",
+                " some-slug",
+                "some slug",
+                "some-slug ",
+                "-some-slug",
+                "some-slug-",
+                "some_slug",
+                "sOmE-sLuG",
+                "søme-slûg",
+                "슬러그-약간의"
+        );
+    }
+
+    static Stream<String> validNames() {
+        return Stream.of(
+                "Some Name",
+                "n",
+                "n".repeat(50)
+        );
+    }
+
+    static Stream<String> invalidNames() {
+        return Stream.of(
+                "",
+                "n".repeat(51)
+        );
+    }
+
+    static Stream<String> validDescriptions() {
+        return Stream.of(
+                "Some Description",
+                "",
+                "d",
+                "d".repeat(50)
+        );
+    }
+
+    @Test
+    void createBrand_withoutSlug_shouldReturnBadRequest() {
+        final var dto = new BrandDTO(null, "Some Name", "Some Description");
+        final var brand = new Brand(null, "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(brand);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
+                .body("""
+                        {
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.errors").isNotEmpty()
                 .jsonPath("$.errors[0].detail").isNotEmpty()
-                .jsonPath("$.errors[0].pointer").isEqualTo(pointer);
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/slug");
     }
 
-    static Stream<Arguments> invalidBrandDTOs() {
-        return Stream.of(
-                // invalid slug
-                Arguments.of(new BrandDTO(null, "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("s".repeat(51), "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("-", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("--", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("some--slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO(" some-slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("some slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("some-slug ", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("-some-slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("some-slug-", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("some_slug", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("sOmE-sLuG", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("søme-slûg", "Some Name" , "Some Description"), "#/slug"),
-                Arguments.of(new BrandDTO("슬러그-약간의", "Some Name" , "Some Description"), "#/slug"),
-                // invalid name
-                Arguments.of(new BrandDTO("some-slug", null , "Some Description"), "#/name"),
-                Arguments.of(new BrandDTO("some-slug", "" , "Some Description"), "#/name"),
-                Arguments.of(new BrandDTO("some-slug", "n".repeat(51) , "Some Description"), "#/name"),
-                // invalid description
-                Arguments.of(new BrandDTO("some-slug", "Some Name", "d".repeat(2001)), "#/description")
-        );
+    @ParameterizedTest
+    @MethodSource("validSlugs")
+    void createBrand_withValidSlug_shouldReturnLocationOfCreatedBrand(String slug) {
+        final var dto = new BrandDTO(slug, "Some Name", "Some Description");
+        final var brand = new Brand(slug, "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "%s",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """.formatted(slug))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/brands/" + slug);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSlugs")
+    void createBrand_withInvalidSlug_shouldReturnBadRequest(String slug) {
+        final var dto = new BrandDTO(slug, "Some Name", "Some Description");
+        final var brand = new Brand(slug, "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "%s",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """.formatted(slug))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/slug");
+    }
+
+    @Test
+    void createBrand_withoutName_shouldReturnBadRequest() {
+        final var dto = new BrandDTO("some-slug", null, "Some Description");
+        final var brand = new Brand("some-slug", null, "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "description": "Some Description"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
+    }
+
+    @ParameterizedTest
+    @MethodSource("validNames")
+    void createBrand_withValidName_shouldReturnLocationOfCreatedBrand(String name) {
+        final var dto = new BrandDTO("some-slug", name, "Some Description");
+        final var brand = new Brand("some-slug", name, "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "%s",
+                            "description": "Some Description"
+                        }
+                        """.formatted(name))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/brands/some-slug");
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidNames")
+    void createBrand_withInvalidName_shouldReturnBadRequest(String name) {
+        final var dto = new BrandDTO("some-slug", name, "Some Description");
+        final var brand = new Brand("some-slug", name, "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "%s",
+                            "description": "Some Description"
+                        }
+                        """.formatted(name))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
+    }
+
+    @Test
+    void createBrand_withoutDescription_shouldReturnLocationOfCreatedBrand() {
+        final var dto = new BrandDTO("some-slug", "Some Name", null);
+        final var brand = new Brand("some-slug", "Some Name", null);
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/brands/some-slug");
+    }
+
+    @ParameterizedTest
+    @MethodSource("validDescriptions")
+    void createBrand_withValidDescription_shouldReturnLocationOfCreatedBrand(String description) {
+        final var dto = new BrandDTO("some-slug", "Some Name", description);
+        final var brand = new Brand("some-slug", "Some Name", description);
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "%s"
+                        }
+                        """.formatted(description))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().location("http://localhost/api/brands/some-slug");
+    }
+
+    @Test
+    void createBrand_withInvalidDescription_shouldReturnBadRequest() {
+        final var invalidDescription = "d".repeat(2001);
+        final var dto = new BrandDTO("some-slug", "Some Name", invalidDescription);
+        final var brand = new Brand("some-slug", "Some Name", invalidDescription);
+        when(brandService.createBrand(dto)).thenReturn(brand);
+        restTestClient.post().uri("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "%s"
+                        }
+                        """.formatted(invalidDescription))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/description");
     }
 
     @Test
     void createBrand_withDuplicateSlug_shouldReturnBadRequest() {
-        final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
-        when(brandService.createBrand(dto))
-                .thenThrow(new SlugAlreadyExistsException());
+        final var dto = new BrandDTO("some-slug", "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenThrow(new SlugAlreadyExistsException());
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -115,13 +302,18 @@ class BrandControllerTest {
 
     @Test
     void createBrand_withDuplicateName_shouldReturnBadRequest() {
-        final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
-        when(brandService.createBrand(dto))
-                .thenThrow(new NameAlreadyExistsException());
+        final var dto = new BrandDTO("some-slug", "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenThrow(new NameAlreadyExistsException());
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(dto)
+                .body("""
+                        {
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -132,9 +324,10 @@ class BrandControllerTest {
 
     @Test
     void findBrandBySlug_withExistingSlug_shouldReturnBrand() {
-        final var dto = new BrandDTO("some-slug", "Some Name" , "Some Description");
-        when(brandService.findBrandBySlug(dto.slug())).thenReturn(dto.toBrand());
-        restTestClient.get().uri("/api/brands/" + dto.slug())
+        final var dto = new BrandDTO("some-slug", "Some Name", "Some Description");
+        final var brand = new Brand("some-slug", "Some Name", "Some Description");
+        when(brandService.findBrandBySlug("some-slug")).thenReturn(brand);
+        restTestClient.get().uri("/api/brands/some-slug")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
