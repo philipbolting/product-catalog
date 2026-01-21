@@ -20,6 +20,15 @@ public class CategoryTree {
     public CategoryTree() {
     }
 
+    public CategoryTree(Long id, Long parentId, String name, String slug, String sortOrder, int depth) {
+        this.id = id;
+        this.parentId = parentId;
+        this.name = name;
+        this.slug = slug;
+        this.sortOrder = sortOrder;
+        this.depth = depth;
+    }
+
     public Long getId() {
         return id;
     }
