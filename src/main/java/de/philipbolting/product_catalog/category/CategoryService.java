@@ -18,18 +18,25 @@ class CategoryService {
     }
 
     @Transactional
-    public Category createCategory(CategoryDTO dto) {
+    public CategoryDTO createCategory(CategoryDTO dto) {
         if (categoryTreeRepository.findBySlug(dto.slug()).isPresent()) {
             throw new SlugAlreadyExistsException();
         }
+        final var category = dto.toCategory();
         final var parentSlug = extractParentSlug(dto.slug());
         if (parentSlug != null) {
-            final var parentCategory = categoryTreeRepository.findBySlug(parentSlug).orElseThrow(NotFoundException::new);
-            if (categoryTreeRepository.findByParentIdAndName(parentCategory.getId(), dto.name()).isPresent()) {
+            final var parentCategoryTree = categoryTreeRepository.findBySlug(parentSlug).orElseThrow(NotFoundException::new);
+            if (categoryTreeRepository.findByParentIdAndName(parentCategoryTree.getId(), dto.name()).isPresent()) {
                 throw new NameAlreadyExistsException();
             }
+            final var parentCategory = categoryRepository.findById(parentCategoryTree.getId()).orElseThrow(NotFoundException::new);
+            category.setParent(parentCategory);
+            final var slug = dto.slug().substring(parentSlug.length() + 1);
+            category.setSlug(slug);
         }
-        return categoryRepository.save(dto.toCategory());
+        final var savedCategory = categoryRepository.save(category);
+        final var fullSlug = parentSlug != null ? parentSlug + "/" + savedCategory.getSlug() : savedCategory.getSlug();
+        return CategoryDTO.fromCategory(savedCategory).withSlug(fullSlug);
     }
 
     public Category findCategoryBySlug(String slug) {

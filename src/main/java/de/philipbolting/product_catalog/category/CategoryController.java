@@ -17,17 +17,18 @@ class CategoryController {
 
     @PostMapping()
     public ResponseEntity<?> createCategory(@Valid @RequestBody final CategoryDTO request) {
-        final var category = categoryService.createCategory(request);
+        final var dto = categoryService.createCategory(request);
         final var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{slug}")
-                .buildAndExpand(category.getSlug())
+                .buildAndExpand(dto.slug())
                 .toUri();
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("{slug}")
-    public CategoryDTO findCategoryBySlug(@PathVariable String slug) {
+    @GetMapping("{*slugWithLeadingSlash}")
+    public CategoryDTO findCategoryBySlug(@PathVariable String slugWithLeadingSlash) {
+        final var slug = slugWithLeadingSlash.substring(1);
         return CategoryDTO.fromCategory(categoryService.findCategoryBySlug(slug));
     }
 }

@@ -20,16 +20,30 @@ Accept: application/json
 ### Category API
 ### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-### Create Category
+### Create Parent Category
 POST http://localhost:8080/api/categories
 Content-Type: application/json
 
 {
-  "slug": "some-category-slug",
-  "name": "Some Category Name",
-  "description": "Some Category Description"
+  "slug": "some-parent-category-slug",
+  "name": "Some Parent Category Name",
+  "description": "Some Parent Category Description"
 }
 
-### Read Category
-GET http://localhost:8080/api/categories/some-category-slug
+### Create Child Category
+POST http://localhost:8080/api/categories
+Content-Type: application/json
+
+{
+  "slug": "some-parent-category-slug/some-child-category-slug",
+  "name": "Some Child Category Name",
+  "description": "Some Child Category Description"
+}
+
+### Read Parent Category
+GET http://localhost:8080/api/categories/some-parent-category-slug
+Accept: application/json
+
+### Read Child Category
+GET http://localhost:8080/api/categories/some-parent-category-slug/some-child-category-slug
 Accept: application/json

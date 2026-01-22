@@ -33,13 +33,13 @@ class CategoryControllerTest {
         return Stream.of(
                 "some-slug",
                 "s",
-                "s".repeat(50));
+                "s".repeat(100));
     }
 
     static Stream<String> invalidSlugs() {
         return Stream.of(
                 "",
-                "s".repeat(51),
+                "s".repeat(101),
                 "-",
                 "--",
                 "some--slug",
@@ -51,7 +51,16 @@ class CategoryControllerTest {
                 "some_slug",
                 "sOmE-sLuG",
                 "søme-slûg",
-                "슬러그-약간의"
+                "슬러그-약간의",
+                "/",
+                "//",
+                "//some-slug",
+                "/some-slug",
+                "/some-slug/",
+                "/some-slug//",
+                "some-/slug",
+                "some/-slug"
+
         );
     }
 
@@ -82,7 +91,7 @@ class CategoryControllerTest {
     @Test
     void createCategory_withoutSlug_shouldReturnBadRequest() {
         final var dto = new CategoryDTO(null, "Some Name", "Some Description");
-        final var category = new Category(null, "Some Name", "Some Description");
+        final var category = new CategoryDTO(null, "Some Name", "Some Description");
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +114,7 @@ class CategoryControllerTest {
     @MethodSource("validSlugs")
     void createCategory_withValidSlug_shouldReturnLocationOfCreatedCategory(String slug) {
         final var dto = new CategoryDTO(slug, "Some Name", "Some Description");
-        final var category = new Category(slug, "Some Name", "Some Description");
+        final var category = new CategoryDTO(slug, "Some Name", "Some Description");
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -126,7 +135,7 @@ class CategoryControllerTest {
     @MethodSource("invalidSlugs")
     void createCategory_withInvalidSlug_shouldReturnBadRequest(String slug) {
         final var dto = new CategoryDTO(slug, "Some Name", "Some Description");
-        final var category = new Category(slug, "Some Name", "Some Description");
+        final var category = new CategoryDTO(slug, "Some Name", "Some Description");
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +158,7 @@ class CategoryControllerTest {
     @Test
     void createCategory_withoutName_shouldReturnBadRequest() {
         final var dto = new CategoryDTO("some-slug", null, "Some Description");
-        final var category = new Category("some-slug", null, "Some Description");
+        final var category = new CategoryDTO("some-slug", null, "Some Description");
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -172,7 +181,7 @@ class CategoryControllerTest {
     @MethodSource("validNames")
     void createCategory_withValidName_shouldReturnLocationOfCreatedCategory(String name) {
         final var dto = new CategoryDTO("some-slug", name, "Some Description");
-        final var category = new Category("some-slug", name, "Some Description");
+        final var category = new CategoryDTO("some-slug", name, "Some Description");
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -193,7 +202,7 @@ class CategoryControllerTest {
     @MethodSource("invalidNames")
     void createCategory_withInvalidName_shouldReturnBadRequest(String name) {
         final var dto = new CategoryDTO("some-slug", name, "Some Description");
-        final var category = new Category("some-slug", name, "Some Description");
+        final var category = new CategoryDTO("some-slug", name, "Some Description");
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -216,7 +225,7 @@ class CategoryControllerTest {
     @Test
     void createCategory_withoutDescription_shouldReturnLocationOfCreatedCategory() {
         final var dto = new CategoryDTO("some-slug", "Some Name", null);
-        final var category = new Category("some-slug", "Some Name", null);
+        final var category = new CategoryDTO("some-slug", "Some Name", null);
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -236,7 +245,7 @@ class CategoryControllerTest {
     @MethodSource("validDescriptions")
     void createCategory_withValidDescription_shouldReturnLocationOfCreatedCategory(String description) {
         final var dto = new CategoryDTO("some-slug", "Some Name", description);
-        final var category = new Category("some-slug", "Some Name", description);
+        final var category = new CategoryDTO("some-slug", "Some Name", description);
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -257,7 +266,7 @@ class CategoryControllerTest {
     void createCategory_withInvalidDescription_shouldReturnBadRequest() {
         final var invalidDescription = "d".repeat(2001);
         final var dto = new CategoryDTO("some-slug", "Some Name", invalidDescription);
-        final var category = new Category("some-slug", "Some Name", invalidDescription);
+        final var category = new CategoryDTO("some-slug", "Some Name", invalidDescription);
         when(categoryService.createCategory(dto)).thenReturn(category);
         restTestClient.post().uri("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -324,6 +333,23 @@ class CategoryControllerTest {
     @Test
     void findCategoryBySlug_withExistingSlug_shouldReturnCategory() {
         final String expectedSlug = "some-slug";
+        final String expectedName = "Some Name";
+        final String expectedDescription = "Some Description";
+        final var category = new Category(expectedSlug, expectedName, expectedDescription);
+        when(categoryService.findCategoryBySlug(expectedSlug)).thenReturn(category);
+        restTestClient.get().uri("/api/categories/" + expectedSlug)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.slug").isEqualTo(expectedSlug)
+                .jsonPath("$.name").isEqualTo(expectedName)
+                .jsonPath("$.description").isEqualTo(expectedDescription);
+    }
+
+    @Test
+    void findCategoryBySlug_withExistingNestedSlug_shouldReturnCategory() {
+        final String expectedSlug = "some-parent-slug/some-child-slug";
         final String expectedName = "Some Name";
         final String expectedDescription = "Some Description";
         final var category = new Category(expectedSlug, expectedName, expectedDescription);

@@ -54,6 +54,30 @@ public class Category {
         this.description = description;
     }
 
+    public Category(long id, Category parent, int sortOrder, String slug, String name, String description, Instant created, Instant lastModified) {
+        this.id = id;
+        this.parent = parent;
+        this.sortOrder = sortOrder;
+        this.slug = slug;
+        this.name = name;
+        this.description = description;
+        this.created = created;
+        this.lastModified = lastModified;
+    }
+
+    public static Category of(Category category) {
+        return new Category(
+                category.id,
+                category.parent,
+                category.sortOrder,
+                category.slug,
+                category.name,
+                category.description,
+                category.created,
+                category.lastModified
+        );
+    }
+
     public long getId() {
         return id;
     }

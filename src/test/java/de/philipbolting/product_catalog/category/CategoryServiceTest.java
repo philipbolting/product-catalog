@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,24 +53,27 @@ class CategoryServiceTest {
         when(categoryRepository.save(dto.toCategory())).thenReturn(dto.toCategory());
         var category = categoryService.createCategory(dto);
         assertNotNull(category);
-        assertEquals("some-slug", category.getSlug());
-        assertEquals("Some Category", category.getName());
-        assertEquals("Some description", category.getDescription());
+        assertEquals("some-slug", category.slug());
+        assertEquals("Some Category", category.name());
+        assertEquals("Some description", category.description());
     }
 
     @Test
     void createCategory_withParentAndUniqueSlugAndName_shouldReturnCategory() {
-        final var parentCategory = new CategoryTree(123L, null, "Some Parent Category", "some-parent-slug", "001", 0);
+        final var parentCategoryTree = new CategoryTree(123L, null, "Some Parent Category", "some-parent-slug", "001", 0);
+        final var parentCategory = new Category(123L, null,1,"some-parent-slug", "Some Parent Category", "Some parent description", Instant.now(), Instant.now());
+        final var childCategory = new Category(parentCategory, 1,"some-child-slug", "Some Child Category", "Some child description");
         final var dto = new CategoryDTO("some-parent-slug/some-child-slug", "Some Child Category", "Some child description");
         when(categoryTreeRepository.findBySlug("some-parent-slug/some-child-slug")).thenReturn(Optional.empty());
-        when(categoryTreeRepository.findBySlug("some-parent-slug")).thenReturn(Optional.of(parentCategory));
+        when(categoryTreeRepository.findBySlug("some-parent-slug")).thenReturn(Optional.of(parentCategoryTree));
         when(categoryTreeRepository.findByParentIdAndName(123L, "Some Child Category")).thenReturn(Optional.empty());
-        when(categoryRepository.save(dto.toCategory())).thenReturn(dto.toCategory());
+        when(categoryRepository.findById(123L)).thenReturn(Optional.of(parentCategory));
+        when(categoryRepository.save(childCategory)).thenReturn(childCategory);
         var category = categoryService.createCategory(dto);
         assertNotNull(category);
-        assertEquals("some-parent-slug/some-child-slug", category.getSlug());
-        assertEquals("Some Child Category", category.getName());
-        assertEquals("Some child description", category.getDescription());
+        assertEquals("some-parent-slug/some-child-slug", category.slug());
+        assertEquals("Some Child Category", category.name());
+        assertEquals("Some child description", category.description());
     }
 
     @Test
