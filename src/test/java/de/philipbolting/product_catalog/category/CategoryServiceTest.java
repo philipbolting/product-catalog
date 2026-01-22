@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,14 +59,16 @@ class CategoryServiceTest {
 
     @Test
     void createCategory_withParentAndUniqueSlugAndName_shouldReturnCategory() {
-        final var parentCategoryTree = new CategoryTree(123L, null, "Some Parent Category", "some-parent-slug", "001", 0);
-        final var parentCategory = new Category(123L, null,1,"some-parent-slug", "Some Parent Category", "Some parent description", Instant.now(), Instant.now());
+        final var parentCategoryId = 123L;
+        final var parentCategoryTree = new CategoryTree(parentCategoryId, null, "Some Parent Category", "some-parent-slug", "001", 0);
+        final var parentCategory = new Category("some-parent-slug", "Some Parent Category", "Some parent description");
+        parentCategory.setId(parentCategoryId);
         final var childCategory = new Category(parentCategory, 1,"some-child-slug", "Some Child Category", "Some child description");
         final var dto = new CategoryDTO("some-parent-slug/some-child-slug", "Some Child Category", "Some child description");
         when(categoryTreeRepository.findBySlug("some-parent-slug/some-child-slug")).thenReturn(Optional.empty());
         when(categoryTreeRepository.findBySlug("some-parent-slug")).thenReturn(Optional.of(parentCategoryTree));
-        when(categoryTreeRepository.findByParentIdAndName(123L, "Some Child Category")).thenReturn(Optional.empty());
-        when(categoryRepository.findById(123L)).thenReturn(Optional.of(parentCategory));
+        when(categoryTreeRepository.findByParentIdAndName(parentCategoryId, "Some Child Category")).thenReturn(Optional.empty());
+        when(categoryRepository.findById(parentCategoryId)).thenReturn(Optional.of(parentCategory));
         when(categoryRepository.save(childCategory)).thenReturn(childCategory);
         var category = categoryService.createCategory(dto);
         assertNotNull(category);
