@@ -1,4 +1,4 @@
-TRUNCATE TABLE category;
+TRUNCATE TABLE category CASCADE;
 INSERT INTO category (id, parent_id, sort_order, slug, name) VALUES
 (1, NULL, 1, 'category-1', 'Category 1'),
 (2, NULL, 2, 'category-2', 'Category 2'),
