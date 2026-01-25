@@ -6,7 +6,9 @@ import de.philipbolting.product_catalog.category.CategoryTreeRepository;
 import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
 import de.philipbolting.product_catalog.error.NotFoundException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ProductService {
 
     private final ProductRepository productRepository;
