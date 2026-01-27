@@ -2,6 +2,7 @@ package de.philipbolting.product_catalog.category;
 
 import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
 import de.philipbolting.product_catalog.error.NotFoundException;
+import de.philipbolting.product_catalog.error.ParentCategoryNotFoundException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ class CategoryService {
         final var category = dto.toCategory();
         final var parentSlug = extractParentSlug(dto.slug());
         if (parentSlug != null) {
-            final var parentCategoryTree = categoryTreeRepository.findBySlug(parentSlug).orElseThrow(NotFoundException::new);
+            final var parentCategoryTree = categoryTreeRepository.findBySlug(parentSlug).orElseThrow(ParentCategoryNotFoundException::new);
             if (categoryTreeRepository.findByParentIdAndName(parentCategoryTree.getId(), dto.name()).isPresent()) {
                 throw new NameAlreadyExistsException();
             }

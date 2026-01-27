@@ -38,6 +38,13 @@ public class RestExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return pd;
     }
 
+    @ExceptionHandler(ParentCategoryNotFoundException.class)
+    ProblemDetail handleParentCategoryNotFoundException(ParentCategoryNotFoundException e) {
+        var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setProperty("errors", List.of(new ErrorDetail("Parent slug does not exist", "#/slug")));
+        return pd;
+    }
+
     @Override
     protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         super.handleMethodArgumentNotValid(ex, headers, status, request);

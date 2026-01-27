@@ -2,6 +2,7 @@ package de.philipbolting.product_catalog.category;
 
 import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
 import de.philipbolting.product_catalog.error.NotFoundException;
+import de.philipbolting.product_catalog.error.ParentCategoryNotFoundException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,15 @@ class CategoryServiceTest {
         when(categoryTreeRepository.findBySlug(parentCategory.getSlug() )).thenReturn(Optional.of(parentCategory));
         when(categoryTreeRepository.findByParentIdAndName(parentCategory.getId(), dto.name())).thenReturn(Optional.of(duplicateCategory));
         assertThrows(NameAlreadyExistsException.class, () -> categoryService.createCategory(dto));
+    }
+
+    @Test
+    void createCategory_withUnknownParentSlug_shouldThrowException() {
+        final var duplicateName = "Some Child Category";
+        final var dto = new CategoryDTO("some-parent-slug/new-child-slug", duplicateName, "Some description");
+        when(categoryTreeRepository.findBySlug(dto.slug())).thenReturn(Optional.empty());
+        when(categoryTreeRepository.findBySlug("some-parent-slug")).thenReturn(Optional.empty());
+        assertThrows(ParentCategoryNotFoundException.class, () -> categoryService.createCategory(dto));
     }
 
     @Test

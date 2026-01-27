@@ -2,6 +2,7 @@ package de.philipbolting.product_catalog.category;
 
 import de.philipbolting.product_catalog.SecurityConfig;
 import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.ParentCategoryNotFoundException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -328,6 +329,28 @@ class CategoryControllerTest {
                 .jsonPath("$.errors").isNotEmpty()
                 .jsonPath("$.errors[0].detail").isEqualTo("Name already exists")
                 .jsonPath("$.errors[0].pointer").isEqualTo("#/name");
+    }
+
+    @Test
+    void createCategory_withUnknownParentSlug_shouldReturnBadRequest() {
+        final var dto = new CategoryDTO("some-non-existent-parent-slug/some-slug", "Some Name", "Some Description");
+        when(categoryService.createCategory(dto)).thenThrow(new ParentCategoryNotFoundException());
+        restTestClient.post().uri("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "slug": "some-non-existent-parent-slug/some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isEqualTo("Parent slug does not exist")
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/slug");
     }
 
     @Test
