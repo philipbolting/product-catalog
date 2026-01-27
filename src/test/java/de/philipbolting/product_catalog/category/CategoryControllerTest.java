@@ -335,8 +335,8 @@ class CategoryControllerTest {
         final String expectedSlug = "some-slug";
         final String expectedName = "Some Name";
         final String expectedDescription = "Some Description";
-        final var category = new Category(expectedSlug, expectedName, expectedDescription);
-        when(categoryService.findCategoryBySlug(expectedSlug)).thenReturn(category);
+        final var dto = new CategoryDTO(expectedSlug, expectedName, expectedDescription);
+        when(categoryService.findCategoryBySlug(expectedSlug)).thenReturn(dto);
         restTestClient.get().uri("/api/categories/" + expectedSlug)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -352,8 +352,8 @@ class CategoryControllerTest {
         final String expectedSlug = "some-parent-slug/some-child-slug";
         final String expectedName = "Some Name";
         final String expectedDescription = "Some Description";
-        final var category = new Category(expectedSlug, expectedName, expectedDescription);
-        when(categoryService.findCategoryBySlug(expectedSlug)).thenReturn(category);
+        final var dto = new CategoryDTO(expectedSlug, expectedName, expectedDescription);
+        when(categoryService.findCategoryBySlug(expectedSlug)).thenReturn(dto);
         restTestClient.get().uri("/api/categories/" + expectedSlug)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

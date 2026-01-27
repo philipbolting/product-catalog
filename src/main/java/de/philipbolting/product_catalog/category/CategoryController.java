@@ -29,6 +29,6 @@ class CategoryController {
     @GetMapping("{*slugWithLeadingSlash}")
     public CategoryDTO findCategoryBySlug(@PathVariable String slugWithLeadingSlash) {
         final var slug = slugWithLeadingSlash.substring(1);
-        return CategoryDTO.fromCategory(categoryService.findCategoryBySlug(slug));
+        return categoryService.findCategoryBySlug(slug);
     }
 }

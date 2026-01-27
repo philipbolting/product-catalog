@@ -86,9 +86,9 @@ class CategoryServiceTest {
         when(categoryRepository.findById(categoryTreeInfo.getId())).thenReturn(Optional.of(childCategory));
         var category = categoryService.findCategoryBySlug("some-parent-slug/some-child-slug");
         assertNotNull(category);
-        assertEquals("some-parent-slug/some-child-slug", category.getSlug());
-        assertEquals("Some Child Category", category.getName());
-        assertEquals("Some child description", category.getDescription());
+        assertEquals("some-parent-slug/some-child-slug", category.slug());
+        assertEquals("Some Child Category", category.name());
+        assertEquals("Some child description", category.description());
     }
 
     @Test

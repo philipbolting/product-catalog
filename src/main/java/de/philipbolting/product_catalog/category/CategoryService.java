@@ -39,11 +39,11 @@ class CategoryService {
         return CategoryDTO.fromCategory(savedCategory).withSlug(fullSlug);
     }
 
-    public Category findCategoryBySlug(String slug) {
+    public CategoryDTO findCategoryBySlug(String slug) {
         final var categoryTreeInfo = categoryTreeRepository.findBySlug(slug).orElseThrow(NotFoundException::new);
         final var category = categoryRepository.findById(categoryTreeInfo.getId()).orElseThrow(NotFoundException::new);
         category.setSlug(categoryTreeInfo.getSlug());
-        return category;
+        return CategoryDTO.fromCategory(category);
     }
 
     private String extractParentSlug(String slug) {
