@@ -3,9 +3,7 @@ package de.philipbolting.product_catalog.product;
 import de.philipbolting.product_catalog.brand.BrandRepository;
 import de.philipbolting.product_catalog.category.CategoryRepository;
 import de.philipbolting.product_catalog.category.CategoryTreeRepository;
-import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
-import de.philipbolting.product_catalog.error.NotFoundException;
-import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
+import de.philipbolting.product_catalog.error.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,8 +31,8 @@ public class ProductService {
         if (productRepository.findByName(dto.name()).isPresent()) {
             throw new NameAlreadyExistsException();
         }
-        final var brand = brandRepository.findBySlug(dto.brandSlug()).orElseThrow(NotFoundException::new);
-        final var categoryTree = categoryTreeRepository.findBySlug(dto.categorySlug()).orElseThrow(NotFoundException::new);
+        final var brand = brandRepository.findBySlug(dto.brandSlug()).orElseThrow(ProductBrandSlugNotFoundException::new);
+        final var categoryTree = categoryTreeRepository.findBySlug(dto.categorySlug()).orElseThrow(ProductCategorySlugNotFoundException::new);
         final var category = categoryRepository.findById(categoryTree.getId()).orElseThrow(NotFoundException::new);
         final var product = new Product(brand, category, dto.slug(), dto.name(), dto.description());
         final var savedProduct = productRepository.save(product);

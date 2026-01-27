@@ -2,6 +2,8 @@ package de.philipbolting.product_catalog.product;
 
 import de.philipbolting.product_catalog.SecurityConfig;
 import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
+import de.philipbolting.product_catalog.error.ProductBrandSlugNotFoundException;
+import de.philipbolting.product_catalog.error.ProductCategorySlugNotFoundException;
 import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -89,8 +91,8 @@ public class ProductControllerTest {
 
     @Test
     void createProduct_withoutBrandSlug_shouldReturnBadRequest() {
-        final var dto = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
-        final var product = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
+        final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", "Some Description");
+        final var product = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", "Some Description");
         when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -112,9 +114,33 @@ public class ProductControllerTest {
     }
 
     @Test
+    void createProduct_withUnknownBrandSlug_shouldReturnBadRequest() {
+        final var dto = new ProductDTO("unknown-brand", "some-category", "some-slug", "Some Name", "Some Description");
+        when(productService.createProduct(dto)).thenThrow(ProductBrandSlugNotFoundException.class);
+        restTestClient.post().uri("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "brandSlug": "unknown-brand",
+                            "categorySlug": "some-category",
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/brandSlug");
+    }
+
+    @Test
     void createProduct_withoutCategorySlug_shouldReturnBadRequest() {
-        final var dto = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
-        final var product = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
+        final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", "Some Description");
+        final var product = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", "Some Description");
         when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,6 +148,30 @@ public class ProductControllerTest {
                 .body("""
                         {
                             "brandSlug": "some-brand",
+                            "slug": "some-slug",
+                            "name": "Some Name",
+                            "description": "Some Description"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors").isNotEmpty()
+                .jsonPath("$.errors[0].detail").isNotEmpty()
+                .jsonPath("$.errors[0].pointer").isEqualTo("#/categorySlug");
+    }
+
+    @Test
+    void createProduct_withUnknownCategorySlug_shouldReturnBadRequest() {
+        final var dto = new ProductDTO("some-brand", "unknown-category", "some-slug", "Some Name", "Some Description");
+        when(productService.createProduct(dto)).thenThrow(ProductCategorySlugNotFoundException.class);
+        restTestClient.post().uri("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body("""
+                        {
+                            "brandSlug": "some-brand",
+                            "categorySlug": "unknown-category",
                             "slug": "some-slug",
                             "name": "Some Name",
                             "description": "Some Description"

@@ -45,6 +45,20 @@ public class RestExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return pd;
     }
 
+    @ExceptionHandler(ProductBrandSlugNotFoundException.class)
+    ProblemDetail handleProductBrandSlugNotFoundException(ProductBrandSlugNotFoundException e) {
+        var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setProperty("errors", List.of(new ErrorDetail("Brand slug does not exist", "#/brandSlug")));
+        return pd;
+    }
+
+    @ExceptionHandler(ProductCategorySlugNotFoundException.class)
+    ProblemDetail handleProductCategorySlugNotFoundException(ProductCategorySlugNotFoundException e) {
+        var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setProperty("errors", List.of(new ErrorDetail("Category slug does not exist", "#/categorySlug")));
+        return pd;
+    }
+
     @Override
     protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         super.handleMethodArgumentNotValid(ex, headers, status, request);

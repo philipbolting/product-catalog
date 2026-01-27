@@ -6,9 +6,7 @@ import de.philipbolting.product_catalog.category.Category;
 import de.philipbolting.product_catalog.category.CategoryRepository;
 import de.philipbolting.product_catalog.category.CategoryTree;
 import de.philipbolting.product_catalog.category.CategoryTreeRepository;
-import de.philipbolting.product_catalog.error.NameAlreadyExistsException;
-import de.philipbolting.product_catalog.error.NotFoundException;
-import de.philipbolting.product_catalog.error.SlugAlreadyExistsException;
+import de.philipbolting.product_catalog.error.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,7 +61,7 @@ public class ProductServiceTest {
         when(productRepository.findBySlug("some-product")).thenReturn(Optional.empty());
         when(productRepository.findByName("Some Product")).thenReturn(Optional.empty());
         when(brandRepository.findBySlug(brandSlug)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> productService.createProduct(dto));
+        assertThrows(ProductBrandSlugNotFoundException.class, () -> productService.createProduct(dto));
     }
 
     @Test
@@ -75,7 +73,7 @@ public class ProductServiceTest {
         when(productRepository.findByName("Some Product")).thenReturn(Optional.empty());
         when(brandRepository.findBySlug("some-brand")).thenReturn(Optional.of(someBrand));
         when(categoryTreeRepository.findBySlug(categorySlug)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> productService.createProduct(dto));
+        assertThrows(ProductCategorySlugNotFoundException.class, () -> productService.createProduct(dto));
     }
 
     @Test
