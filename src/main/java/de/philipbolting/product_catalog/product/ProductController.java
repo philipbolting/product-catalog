@@ -17,7 +17,7 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO request) {
-        final var dto = productService.create(request);
+        final var dto = productService.createProduct(request);
         final var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{slug}")

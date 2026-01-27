@@ -42,7 +42,7 @@ public class ProductServiceTest {
         final var duplicateProduct = new Product(someBrand, someCategory, duplicateSlug, "Some Product", "Some product description");
         final var dto = new ProductDTO("some-brand", "some-category", duplicateSlug, "Some Product", "Some product description");
         when(productRepository.findBySlug(duplicateSlug)).thenReturn(Optional.of(duplicateProduct));
-        assertThrows(SlugAlreadyExistsException.class, () -> productService.create(dto));
+        assertThrows(SlugAlreadyExistsException.class, () -> productService.createProduct(dto));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class ProductServiceTest {
         final var duplicateProduct = new Product(someBrand, someCategory, "some-slug", duplicateName, "Some product description");
         final var dto = new ProductDTO("some-brand", "some-category", "some-product", duplicateName, "Some product description");
         when(productRepository.findByName(duplicateName)).thenReturn(Optional.of(duplicateProduct));
-        assertThrows(NameAlreadyExistsException.class, () -> productService.create(dto));
+        assertThrows(NameAlreadyExistsException.class, () -> productService.createProduct(dto));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ProductServiceTest {
         when(productRepository.findBySlug("some-product")).thenReturn(Optional.empty());
         when(productRepository.findByName("Some Product")).thenReturn(Optional.empty());
         when(brandRepository.findBySlug(brandSlug)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> productService.create(dto));
+        assertThrows(NotFoundException.class, () -> productService.createProduct(dto));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ProductServiceTest {
         when(productRepository.findByName("Some Product")).thenReturn(Optional.empty());
         when(brandRepository.findBySlug("some-brand")).thenReturn(Optional.of(someBrand));
         when(categoryTreeRepository.findBySlug(categorySlug)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> productService.create(dto));
+        assertThrows(NotFoundException.class, () -> productService.createProduct(dto));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ProductServiceTest {
         when(categoryTreeRepository.findBySlug("some-parent-category/some-category")).thenReturn(Optional.of(someCategoryTree));
         when(categoryRepository.findById(456L)).thenReturn(Optional.of(someCategory));
         when(productRepository.save(someProduct)).thenReturn(someProduct);
-        final var savedProduct = productService.create(productDto);
+        final var savedProduct = productService.createProduct(productDto);
         assertNotNull(savedProduct);
         assertEquals("some-brand", savedProduct.brandSlug());
         assertEquals("some-category", savedProduct.categorySlug());

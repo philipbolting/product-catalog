@@ -91,7 +91,7 @@ public class ProductControllerTest {
     void createProduct_withoutBrandSlug_shouldReturnBadRequest() {
         final var dto = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -115,7 +115,7 @@ public class ProductControllerTest {
     void createProduct_withoutCategorySlug_shouldReturnBadRequest() {
         final var dto = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -139,7 +139,7 @@ public class ProductControllerTest {
     void createProduct_withoutSlug_shouldReturnBadRequest() {
         final var dto = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", null, "Some Name", "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -164,7 +164,7 @@ public class ProductControllerTest {
     void createProduct_withValidSlug_shouldReturnLocationOfCreatedProduct(String slug) {
         final var dto = new ProductDTO("some-brand", "some-category", slug, "Some Name", "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", slug, "Some Name", "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -187,7 +187,7 @@ public class ProductControllerTest {
     void createProduct_withInvalidSlug_shouldReturnBadRequest(String slug) {
         final var dto = new ProductDTO("some-brand", "some-category", slug, "Some Name", "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", slug, "Some Name", "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -212,7 +212,7 @@ public class ProductControllerTest {
     void createProduct_withoutName_shouldReturnBadRequest() {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", null, "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", "some-slug", null, "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -237,7 +237,7 @@ public class ProductControllerTest {
     void createProduct_withValidName_shouldReturnLocationOfCreatedProduct(String name) {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", name, "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", "some-slug", name, "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -260,7 +260,7 @@ public class ProductControllerTest {
     void createProduct_withInvalidName_shouldReturnBadRequest(String name) {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", name, "Some Description");
         final var product = new ProductDTO("some-brand", "some-category", "some-slug", name, "Some Description");
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -285,7 +285,7 @@ public class ProductControllerTest {
     void createProduct_withoutDescription_shouldReturnLocationOfCreatedProduct() {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", null);
         final var product = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", null);
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -307,7 +307,7 @@ public class ProductControllerTest {
     void createProduct_withValidDescription_shouldReturnLocationOfCreatedProduct(String description) {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", description);
         final var product = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", description);
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -330,7 +330,7 @@ public class ProductControllerTest {
         final var invalidDescription = "d".repeat(2001);
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", invalidDescription);
         final var product = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", invalidDescription);
-        when(productService.create(dto)).thenReturn(product);
+        when(productService.createProduct(dto)).thenReturn(product);
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -354,7 +354,7 @@ public class ProductControllerTest {
     @Test
     void createProduct_withDuplicateSlug_shouldReturnBadRequest() {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", "Some Description");
-        when(productService.create(dto)).thenThrow(new SlugAlreadyExistsException());
+        when(productService.createProduct(dto)).thenThrow(new SlugAlreadyExistsException());
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -378,7 +378,7 @@ public class ProductControllerTest {
     @Test
     void createProduct_withDuplicateName_shouldReturnBadRequest() {
         final var dto = new ProductDTO("some-brand", "some-category", "some-slug", "Some Name", "Some Description");
-        when(productService.create(dto)).thenThrow(new NameAlreadyExistsException());
+        when(productService.createProduct(dto)).thenThrow(new NameAlreadyExistsException());
         restTestClient.post().uri("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

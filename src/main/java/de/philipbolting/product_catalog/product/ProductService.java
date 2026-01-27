@@ -26,7 +26,7 @@ public class ProductService {
         this.categoryTreeRepository = categoryTreeRepository;
     }
 
-    public ProductDTO create(ProductDTO dto) {
+    public ProductDTO createProduct(ProductDTO dto) {
         if (productRepository.findBySlug(dto.slug()).isPresent()) {
             throw new SlugAlreadyExistsException();
         }
