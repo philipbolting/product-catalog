@@ -16,17 +16,17 @@ class BrandService {
     }
 
     @Transactional
-    public Brand createBrand(BrandDTO dto) {
+    public BrandDTO createBrand(BrandDTO dto) {
         if (brandRepository.findBySlug(dto.slug()).isPresent()) {
             throw new SlugAlreadyExistsException();
         }
         if (brandRepository.findByName(dto.name()).isPresent()) {
             throw new NameAlreadyExistsException();
         }
-        return brandRepository.save(dto.toBrand());
+        return BrandDTO.fromBrand(brandRepository.save(dto.toBrand()));
     }
 
-    public Brand findBrandBySlug(String slug) {
-        return brandRepository.findBySlug(slug).orElseThrow(NotFoundException::new);
+    public BrandDTO findBrandBySlug(String slug) {
+        return BrandDTO.fromBrand(brandRepository.findBySlug(slug).orElseThrow(NotFoundException::new));
     }
 }

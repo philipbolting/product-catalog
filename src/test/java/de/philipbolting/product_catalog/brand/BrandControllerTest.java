@@ -83,8 +83,8 @@ class BrandControllerTest {
     @Test
     void createBrand_withoutSlug_shouldReturnBadRequest() {
         final var dto = new BrandDTO(null, "Some Name", "Some Description");
-        final var brand = new Brand(null, "Some Name", "Some Description");
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO(null, "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -106,8 +106,8 @@ class BrandControllerTest {
     @MethodSource("validSlugs")
     void createBrand_withValidSlug_shouldReturnLocationOfCreatedBrand(String slug) {
         final var dto = new BrandDTO(slug, "Some Name", "Some Description");
-        final var brand = new Brand(slug, "Some Name", "Some Description");
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO(slug, "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -127,8 +127,8 @@ class BrandControllerTest {
     @MethodSource("invalidSlugs")
     void createBrand_withInvalidSlug_shouldReturnBadRequest(String slug) {
         final var dto = new BrandDTO(slug, "Some Name", "Some Description");
-        final var brand = new Brand(slug, "Some Name", "Some Description");
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO(slug, "Some Name", "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -150,8 +150,8 @@ class BrandControllerTest {
     @Test
     void createBrand_withoutName_shouldReturnBadRequest() {
         final var dto = new BrandDTO("some-slug", null, "Some Description");
-        final var brand = new Brand("some-slug", null, "Some Description");
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", null, "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -173,8 +173,8 @@ class BrandControllerTest {
     @MethodSource("validNames")
     void createBrand_withValidName_shouldReturnLocationOfCreatedBrand(String name) {
         final var dto = new BrandDTO("some-slug", name, "Some Description");
-        final var brand = new Brand("some-slug", name, "Some Description");
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", name, "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -194,8 +194,8 @@ class BrandControllerTest {
     @MethodSource("invalidNames")
     void createBrand_withInvalidName_shouldReturnBadRequest(String name) {
         final var dto = new BrandDTO("some-slug", name, "Some Description");
-        final var brand = new Brand("some-slug", name, "Some Description");
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", name, "Some Description");
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -217,8 +217,8 @@ class BrandControllerTest {
     @Test
     void createBrand_withoutDescription_shouldReturnLocationOfCreatedBrand() {
         final var dto = new BrandDTO("some-slug", "Some Name", null);
-        final var brand = new Brand("some-slug", "Some Name", null);
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", "Some Name", null);
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -237,8 +237,8 @@ class BrandControllerTest {
     @MethodSource("validDescriptions")
     void createBrand_withValidDescription_shouldReturnLocationOfCreatedBrand(String description) {
         final var dto = new BrandDTO("some-slug", "Some Name", description);
-        final var brand = new Brand("some-slug", "Some Name", description);
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", "Some Name", description);
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -258,8 +258,8 @@ class BrandControllerTest {
     void createBrand_withInvalidDescription_shouldReturnBadRequest() {
         final var invalidDescription = "d".repeat(2001);
         final var dto = new BrandDTO("some-slug", "Some Name", invalidDescription);
-        final var brand = new Brand("some-slug", "Some Name", invalidDescription);
-        when(brandService.createBrand(dto)).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", "Some Name", invalidDescription);
+        when(brandService.createBrand(dto)).thenReturn(createBrandResult);
         restTestClient.post().uri("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -325,8 +325,8 @@ class BrandControllerTest {
     @Test
     void findBrandBySlug_withExistingSlug_shouldReturnBrand() {
         final var dto = new BrandDTO("some-slug", "Some Name", "Some Description");
-        final var brand = new Brand("some-slug", "Some Name", "Some Description");
-        when(brandService.findBrandBySlug("some-slug")).thenReturn(brand);
+        final var createBrandResult = new BrandDTO("some-slug", "Some Name", "Some Description");
+        when(brandService.findBrandBySlug("some-slug")).thenReturn(createBrandResult);
         restTestClient.get().uri("/api/brands/some-slug")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

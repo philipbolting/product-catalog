@@ -21,13 +21,13 @@ class BrandController {
         final var location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{slug}")
-                .buildAndExpand(brand.getSlug())
+                .buildAndExpand(brand.slug())
                 .toUri();
         return ResponseEntity.created(location).build();
     }
 
     @GetMapping("{slug}")
     public BrandDTO findBrandBySlug(@PathVariable String slug) {
-        return BrandDTO.fromBrand(brandService.findBrandBySlug(slug));
+        return brandService.findBrandBySlug(slug);
     }
 }

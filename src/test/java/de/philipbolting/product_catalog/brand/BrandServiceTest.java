@@ -44,9 +44,9 @@ class BrandServiceTest {
         when(brandRepository.save(dto.toBrand())).thenReturn(dto.toBrand());
         var brand = brandService.createBrand(dto);
         assertNotNull(brand);
-        assertEquals(dto.slug(), brand.getSlug());
-        assertEquals(dto.name(), brand.getName());
-        assertEquals(dto.description(), brand.getDescription());
+        assertEquals(dto.slug(), brand.slug());
+        assertEquals(dto.name(), brand.name());
+        assertEquals(dto.description(), brand.description());
     }
 
     @Test
@@ -55,9 +55,9 @@ class BrandServiceTest {
         when(brandRepository.findBySlug(dto.slug())).thenReturn(Optional.of(dto.toBrand()));
         var brand = brandService.findBrandBySlug(dto.slug());
         assertNotNull(brand);
-        assertEquals(dto.slug(), brand.getSlug());
-        assertEquals(dto.name(), brand.getName());
-        assertEquals(dto.description(), brand.getDescription());
+        assertEquals(dto.slug(), brand.slug());
+        assertEquals(dto.name(), brand.name());
+        assertEquals(dto.description(), brand.description());
     }
 
     @Test
