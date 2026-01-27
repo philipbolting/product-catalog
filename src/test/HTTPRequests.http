@@ -47,3 +47,23 @@ Accept: application/json
 ### Read Child Category
 GET http://localhost:8080/api/categories/some-parent-category-slug/some-child-category-slug
 Accept: application/json
+
+### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+### Product API
+### ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+### Create Product
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "slug": "some-product-slug",
+  "name": "Some Product",
+  "description": "Some product description",
+  "brandSlug": "some-brand-slug",
+  "categorySlug": "some-parent-category-slug/some-child-category-slug"
+}
+
+### Read Product
+GET http://localhost:8080/api/products/some-product-slug
+Accept: application/json
