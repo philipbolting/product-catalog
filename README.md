@@ -10,26 +10,17 @@ Microservice to manage and distribute product master data.
 ## Setup Instructions (development)
 
 Prerequisites:
-- Java 25
-- Maven
-- Docker
+- [Java 25](https://openjdk.org/projects/jdk/25/)
+- [Maven](https://maven.apache.org)
+- [Docker](https://www.docker.com) (for [Testcontainers](https://java.testcontainers.org))
 
-Create a .env file based on .env.example:
-```
-product-catalog$ cp .env.example .env
-```
-Set a random string as POSTGRES_PASSWORD in the .env file. Docker sets the superuser password for PostgreSQL to the value of this environment variable.
-
-Spring Boot automatically derives the database connection details from the docker compose file. No datasource configuration in application.properties necessary.
-
-Start the application:
-```
-product-catalog$ ./mvnw spring-boot:run
-```
+Local manual testing:
+1. run TestProductCatalogApplication#main
+2. use the example requests in HTTPRequests.http to manually test the API
 
 ## Tech Stack:
-- Backend: Spring Boot, Spring MVC, Spring Data JPA
-- Database: PostgreSQL
-- Security: Spring Security
-- Build Tool: Maven
-- Testing: JUnit, Mockito
+- Backend: [Spring Boot](https://spring.io/projects/spring-boot), Spring MVC, Spring Data JPA
+- Database: [PostgreSQL](https://www.postgresql.org)
+- Security: [Spring Security](https://spring.io/projects/spring-security)
+- Build Tool: [Maven](https://maven.apache.org)
+- Testing: [JUnit](https://junit.org), [Mockito](https://site.mockito.org), [Testcontainers](https://java.testcontainers.org)
